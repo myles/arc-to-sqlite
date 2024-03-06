@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "arc-to-sqlite"
+version = "0.1.0"
+description = ""
+authors = ["Myles Braithwaite <me@mylesbraithwaite.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+click = "^8.1.7"
+sqlite-utils = "^3.36"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
