@@ -3,7 +3,7 @@ import gzip
 import hashlib
 import json
 from pathlib import Path
-from typing import Any, BinaryIO, Dict, Generator, List, Tuple
+from typing import Any, BinaryIO, Dict, Generator, List, Tuple, Union
 
 from sqlite_utils.db import Database, Table
 
@@ -60,7 +60,7 @@ def build_database(db: Database):
                 "export_type": str,
                 "last_processed_at": datetime.datetime,
             },
-            pk="int",
+            pk="id",
         )
 
     if places_table.exists() is False:
@@ -183,7 +183,33 @@ def calculate_file_obj_checksum(file_obj: BinaryIO) -> str:
     return file_hash.hexdigest()
 
 
-def save_arc_export_file(path: Path, file_checksum: str, table: Table) -> Table:
+def get_arc_export_file_row(
+    file_name: str, table: Table
+) -> Union[Tuple[int, Dict[str, Any]], None]:
+    """
+    Get the Arc export file metadata from the SQLite database.
+    """
+    try:
+        pk, row = next(
+            table.pks_and_rows_where(
+                where="file_name = :file_name",
+                where_args={
+                    "file_name": file_name
+                },
+            )
+        )
+    except StopIteration:
+        return None
+
+    return pk, row
+
+
+def save_arc_export_file(
+    path: Path,
+    file_checksum: str,
+    row_id: Union[int, None],
+    table: Table,
+) -> Table:
     """
     Save the Arc export file metadata to the SQLite database.
     """
@@ -192,24 +218,10 @@ def save_arc_export_file(path: Path, file_checksum: str, table: Table) -> Table:
         file_checksum=file_checksum,
     )
 
-    # Check if the file already exists in the database.
-    try:
-        existing_pk, _ = next(
-            table.pks_and_rows_where(
-                where="file_name = :file_name AND export_type = :export_type",
-                where_args={
-                    "file_name": data["file_name"],
-                    "export_type": data["export_type"],
-                },
-            )
-        )
-    except StopIteration:
-        existing_pk = None
-
     # Insert or update the file metadata.
-    if existing_pk is None:
+    if row_id is None:
         return table.insert(data)
-    return table.update(existing_pk, data)
+    return table.update(row_id, data)
 
 
 def save_places(places: List[Dict[str, Any]], places_table: Table):
@@ -273,7 +285,7 @@ def extract_places_and_samples_from_timeline_items(
     return timeline_items, places, samples
 
 
-def process_arc_export_file(db: Database, arc_export_file: Path):
+def process_arc_export_file(db: Database, file_path: Path):
     """
     Process an Arc export file and save the data to the SQLite database.
     """
@@ -281,13 +293,30 @@ def process_arc_export_file(db: Database, arc_export_file: Path):
 
     # Calculate the checksum of the file and save the file metadata to the
     # database.
-    with arc_export_file.open("rb") as file_obj:
+    with file_path.open("rb") as file_obj:
         file_checksum = calculate_file_obj_checksum(file_obj)
 
-    save_arc_export_file(arc_export_file, file_checksum, arc_export_files_table)
+    # Check if the file has already been processed.
+    arc_export_file_values = get_arc_export_file_row(
+        file_path.name, arc_export_files_table
+    )
+    if arc_export_file_values is not None:
+        arc_export_file_row_id, arc_export_file_data = arc_export_file_values
+
+        if arc_export_file_data["file_checksum"] == file_checksum:
+            return
+    else:
+        arc_export_file_row_id = None
+
+    save_arc_export_file(
+        file_path,
+        file_checksum=file_checksum,
+        row_id=arc_export_file_row_id,
+        table=arc_export_files_table,
+    )
 
     # Load the Arc export data and save it to the database.
-    with gzip.open(arc_export_file, "rb") as file_obj:
+    with gzip.open(file_path, "rb") as file_obj:
         timeline_items = json.load(file_obj)["timelineItems"]
 
     timeline_items, places, samples = (
