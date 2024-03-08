@@ -1,11 +1,18 @@
+import datetime
 import gzip
+import hashlib
 import json
 from pathlib import Path
-from typing import Any, Dict, Generator, List, Tuple, BinaryIO
-import datetime
+from typing import Any, BinaryIO, Dict, Generator, List, Tuple
+
 from sqlite_utils.db import Database, Table
-import hashlib
-from .transformers import transform_place, transform_sample, transform_timeline_item, transform_arc_export_file_path
+
+from .transformers import (
+    transform_arc_export_file_path,
+    transform_place,
+    transform_sample,
+    transform_timeline_item,
+)
 
 
 def open_database(db_file_path: Path) -> Database:
@@ -176,9 +183,7 @@ def calculate_file_obj_checksum(file_obj: BinaryIO) -> str:
     return file_hash.hexdigest()
 
 
-def save_arc_export_file(
-    path: Path, file_checksum: str, table: Table
-) -> Table:
+def save_arc_export_file(path: Path, file_checksum: str, table: Table) -> Table:
     """
     Save the Arc export file metadata to the SQLite database.
     """
@@ -285,7 +290,9 @@ def process_arc_export_file(db: Database, arc_export_file: Path):
     with gzip.open(arc_export_file, "rb") as file_obj:
         timeline_items = json.load(file_obj)["timelineItems"]
 
-    timeline_items, places, samples = extract_places_and_samples_from_timeline_items(timeline_items)
+    timeline_items, places, samples = (
+        extract_places_and_samples_from_timeline_items(timeline_items)
+    )
 
     places_table = get_table("places", db=db)
     timeline_items_table = get_table("timeline_items", db=db)
