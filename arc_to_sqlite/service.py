@@ -193,9 +193,7 @@ def get_arc_export_file_row(
         pk, row = next(
             table.pks_and_rows_where(
                 where="file_name = :file_name",
-                where_args={
-                    "file_name": file_name
-                },
+                where_args={"file_name": file_name},
             )
         )
     except StopIteration:
