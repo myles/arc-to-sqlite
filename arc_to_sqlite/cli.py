@@ -1,25 +1,54 @@
 from pathlib import Path
-
+from typing import Literal
 import click
 
 from . import service
 
 
 @click.command()
-@click.version_option()
 @click.argument(
     "db_path",
     type=click.Path(file_okay=True, dir_okay=False, allow_dash=False),
     required=True,
 )
 @click.argument(
-    "arc_export_path",
+    "arc_root_dir",
     type=click.Path(
         file_okay=False, dir_okay=True, allow_dash=True, exists=True
     ),
-    help="Path to the directory containing the Arc export files.",
+    required=True,
 )
-def cli(db_path: Path, arc_export_path: Path):
+@click.option(
+    "--export-type",
+    type=click.Choice(["daily", "monthly"]),
+    default="daily",
+)
+def cli(
+    db_path: str,
+    arc_root_dir: str,
+    export_type: Literal["daily", "monthly"] = "daily",
+):
     """
     Save data from Arc's export to a SQLite database.
     """
+    # Open the SQLite database and build the database structure.
+    db_path = Path(db_path)
+
+    db = service.open_database(db_path)
+    service.build_database(db)
+
+    # Get the Arc export path for the given export type.
+    arc_json_export_path = Path(arc_root_dir) / "Documents/Export/JSON"
+
+    if export_type == "monthly":
+        arc_export_path = arc_json_export_path / "Monthly"
+    else:
+        arc_export_path = arc_json_export_path / "Daily"
+
+    arc_export_file_paths = service.list_arc_export_files(arc_export_path)
+    with click.progressbar(
+        arc_export_file_paths,
+        label=f"Processing {export_type} export files",
+    ) as bar:
+        for arc_export_file_path in bar:
+            service.process_arc_export_file(db, arc_export_file_path)
