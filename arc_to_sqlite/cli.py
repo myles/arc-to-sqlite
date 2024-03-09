@@ -33,9 +33,7 @@ def cli(
     Save data from Arc's export to a SQLite database.
     """
     # Open the SQLite database and build the database structure.
-    db_path = Path(db_path)
-
-    db = service.open_database(db_path)
+    db = service.open_database(Path(db_path))
     service.build_database(db)
 
     # Get the Arc export path for the given export type.
