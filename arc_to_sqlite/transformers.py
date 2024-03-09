@@ -59,7 +59,7 @@ def transform_sample(sample: Dict[str, Any]):
     """
     Transform the sample data from the Arc JSON to the SQLite schema.
     """
-    location = sample.pop("location") or {}
+    location = sample.pop("location", None) or {}
     for key, value in location.items():
         sample[f"location_{convert_to_snake_case(key)}"] = value
 
@@ -128,11 +128,11 @@ def transform_timeline_item(timeline_item: Dict[str, Any]):
     """
     Transform the timeline item data from the Arc JSON to the SQLite schema.
     """
-    center = timeline_item.pop("center", {})
+    center = timeline_item.pop("center", None) or {}
     for key, value in center.items():
         timeline_item[f"center_{convert_to_snake_case(key)}"] = value
 
-    radius = timeline_item.pop("radius", {})
+    radius = timeline_item.pop("radius", None) or {}
     for key, value in radius.items():
         timeline_item[f"radius_{convert_to_snake_case(key)}"] = value
 

@@ -1,7 +1,8 @@
+import datetime
 from copy import deepcopy
-
+from pathlib import Path
 import pytest
-
+from freezegun import freeze_time
 from arc_to_sqlite import transformers
 
 from . import fixtures
@@ -65,6 +66,20 @@ def test_transform_sample():
     }
 
 
+def test_transform_sample__no_location():
+    sample = deepcopy(fixtures.SAMPLE_TWO)
+
+    result = transformers.transform_sample(sample)
+    assert "location_speed" not in result
+    assert "location_longitude" not in result
+    assert "location_altitude" not in result
+    assert "location_course" not in result
+    assert "location_timestamp" not in result
+    assert "location_horizontal_accuracy" not in result
+    assert "location_latitude" not in result
+    assert "location_vertical_accuracy" not in result
+
+
 def test_transform_timeline_item():
     timeline_item = deepcopy(fixtures.TIMELINE_ITEM_ONE)
     result = transformers.transform_timeline_item(fixtures.TIMELINE_ITEM_ONE)
@@ -91,4 +106,47 @@ def test_transform_timeline_item():
         "previous_item_id": timeline_item["previousItemId"],
         "floors_descended": timeline_item["floorsDescended"],
         "active_energy_burned": timeline_item["activeEnergyBurned"],
+    }
+
+
+def test_transform_timeline_item__no_center_and_radius():
+    timeline_item = deepcopy(fixtures.TIMELINE_ITEM_TWO)
+
+    result = transformers.transform_timeline_item(timeline_item)
+    assert "center_latitude" not in result
+    assert "center_longitude" not in result
+    assert "radius_mean" not in result
+    assert "radius_sd" not in result
+
+
+@freeze_time("2024-01-01")
+@pytest.mark.parametrize(
+    'path, expected_file_checksum, expected_export_type',
+    (
+        (Path('/path/to/arc_export/Monthly/2024-01.json.gz'), '12345678901234567890', 'monthly'),
+        (Path('/path/to/arc_export/Daily/2024-01-01.json.gz'), '1234567890', 'daily'),
+    )
+)
+def test_transform_arc_export_file_path(
+    path,
+    expected_file_checksum,
+    expected_export_type,
+    mocker,
+):
+    expected_file_size = 1234
+    expected_last_processed_at = datetime.datetime.now(tz=datetime.timezone.utc)
+
+    mocker.patch('arc_to_sqlite.transformers.Path.stat', return_value=mocker.Mock(st_size=expected_file_size))
+
+    result = transformers.transform_arc_export_file_path(
+        path,
+        file_checksum=expected_file_checksum,
+    )
+    assert result == {
+        'file_name': path.name,
+        'file_path': str(path.absolute()),
+        'file_size': expected_file_size,
+        'file_checksum': expected_file_checksum,
+        'export_type': expected_export_type,
+        'last_processed_at': expected_last_processed_at,
     }
