@@ -35,3 +35,8 @@ clean:
 	rm -f .coverage
 	rm -f coverage.xml
 	find . -type f -name '*.py[co]' -delete -o -type d -name __pycache__ -delete
+
+.PHONY: datasette
+datasette:
+	poetry run datasette serve arc.db \
+		--metadata metadata.yml

@@ -108,6 +108,24 @@ jupyter = ["ipython (>=7.8.0)", "tokenize-rt (>=3.2.0)"]
 uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
+name = "bleach"
+version = "6.1.0"
+description = "An easy safelist-based HTML-sanitizing tool."
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "bleach-6.1.0-py3-none-any.whl", hash = "sha256:3225f354cfc436b9789c66c4ee030194bee0568fbf9cbdad3bc8b5c26c5f12b6"},
+    {file = "bleach-6.1.0.tar.gz", hash = "sha256:0a31f1837963c41d46bbf1331b8778e1308ea0791db03cc4e7357b97cf42a8fe"},
+]
+
+[package.dependencies]
+six = ">=1.9.0"
+webencodings = "*"
+
+[package.extras]
+css = ["tinycss2 (>=1.1.0,<1.3)"]
+
+[[package]]
 name = "certifi"
 version = "2024.2.2"
 description = "Python package for providing Mozilla's CA Bundle."
@@ -260,6 +278,77 @@ rich = ["rich"]
 test = ["beautifulsoup4 (>=4.8.1)", "black (==22.10.0)", "blacken-docs (==1.12.1)", "cogapp (>=3.3.0)", "pytest (>=5.2.2)", "pytest-asyncio (>=0.17)", "pytest-timeout (>=1.4.2)", "pytest-xdist (>=2.2.1)", "trustme (>=0.7)"]
 
 [[package]]
+name = "datasette-cluster-map"
+version = "0.18.1"
+description = "Datasette plugin that shows a map for any data with latitude/longitude columns"
+optional = false
+python-versions = "*"
+files = [
+    {file = "datasette-cluster-map-0.18.1.tar.gz", hash = "sha256:4679f2b5abfdf5560f66898da09ed09763ad2eeb743029c8ba9bf11f05e018c9"},
+    {file = "datasette_cluster_map-0.18.1-py3-none-any.whl", hash = "sha256:43061877b064cec1db3a42bd868bb3580fb5db64e7c03f7dd7fcab224cfd8df2"},
+]
+
+[package.dependencies]
+datasette = ">=0.54"
+datasette-leaflet = ">=0.2.2"
+
+[package.extras]
+playwright = ["pytest-playwright"]
+test = ["httpx", "nest-asyncio", "pytest", "pytest-asyncio", "sqlite-utils"]
+
+[[package]]
+name = "datasette-dashboards"
+version = "0.6.2"
+description = "Datasette plugin providing data dashboards from metadata"
+optional = false
+python-versions = ">=3.8.1,<4.0.0"
+files = [
+    {file = "datasette_dashboards-0.6.2-py3-none-any.whl", hash = "sha256:5e3f2770f491b2231dc45b07297992915677faacc4b1cb757b60010d90351175"},
+    {file = "datasette_dashboards-0.6.2.tar.gz", hash = "sha256:c6f3e764182758a252b29ce444718fd15081481482a74f8e0c74313a4c9f824d"},
+]
+
+[package.dependencies]
+datasette = "*"
+datasette-leaflet = "*"
+datasette-render-markdown = "*"
+
+[[package]]
+name = "datasette-leaflet"
+version = "0.2.2"
+description = "A plugin that bundles Leaflet.js for Datasette"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "datasette-leaflet-0.2.2.tar.gz", hash = "sha256:8fd4e634304be392ae6f7de770d4f22b95a37caecd676a35faeb6200da9423bc"},
+    {file = "datasette_leaflet-0.2.2-py3-none-any.whl", hash = "sha256:fd88c25666e7680b25b4c6e5546bd02c9f5836bbc0fee61042dbb6b93d4139f0"},
+]
+
+[package.dependencies]
+datasette = "*"
+
+[package.extras]
+test = ["pytest", "pytest-asyncio"]
+
+[[package]]
+name = "datasette-render-markdown"
+version = "2.2.1"
+description = "Datasette plugin for rendering Markdown"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "datasette-render-markdown-2.2.1.tar.gz", hash = "sha256:97eca47769ad81a1d225a0c32efe50a2f6f54fbeaa97b883855dd0591ba5b8f5"},
+    {file = "datasette_render_markdown-2.2.1-py3-none-any.whl", hash = "sha256:6e72641b11568afd61e10ec2813c07661cdb1f26ce2935982b30860392bf94dc"},
+]
+
+[package.dependencies]
+bleach = "*"
+datasette = "*"
+markdown = "*"
+
+[package.extras]
+test = ["pytest", "pytest-asyncio"]
+
+[[package]]
 name = "h11"
 version = "0.14.0"
 description = "A pure-Python, bring-your-own-I/O implementation of HTTP/1.1"
@@ -407,6 +496,21 @@ MarkupSafe = ">=2.0"
 
 [package.extras]
 i18n = ["Babel (>=2.7)"]
+
+[[package]]
+name = "markdown"
+version = "3.5.2"
+description = "Python implementation of John Gruber's Markdown."
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "Markdown-3.5.2-py3-none-any.whl", hash = "sha256:d43323865d89fc0cb9b20c75fc8ad313af307cc087e84b657d9eec768eddeadd"},
+    {file = "Markdown-3.5.2.tar.gz", hash = "sha256:e1ac7b3dc550ee80e602e71c1d168002f062e49f1b11e26a36264dafd4df2ef8"},
+]
+
+[package.extras]
+docs = ["mdx-gh-links (>=0.2)", "mkdocs (>=1.5)", "mkdocs-gen-files", "mkdocs-literate-nav", "mkdocs-nature (>=0.6)", "mkdocs-section-index", "mkdocstrings[python]"]
+testing = ["coverage", "pyyaml"]
 
 [[package]]
 name = "markupsafe"
@@ -907,7 +1011,18 @@ h11 = ">=0.8"
 [package.extras]
 standard = ["colorama (>=0.4)", "httptools (>=0.5.0)", "python-dotenv (>=0.13)", "pyyaml (>=5.1)", "uvloop (>=0.14.0,!=0.15.0,!=0.15.1)", "watchfiles (>=0.13)", "websockets (>=10.4)"]
 
+[[package]]
+name = "webencodings"
+version = "0.5.1"
+description = "Character encoding aliases for legacy web content"
+optional = false
+python-versions = "*"
+files = [
+    {file = "webencodings-0.5.1-py2.py3-none-any.whl", hash = "sha256:a0af1213f3c2226497a97e2b3aa01a7e4bee4f403f95be16fc9acd2947514a78"},
+    {file = "webencodings-0.5.1.tar.gz", hash = "sha256:b36a1c245f2d304965eb4e0a82848379241dc04b865afcc4aab16748587e1923"},
+]
+
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "2f312aa4c40ece1e7e6c14df1b91bf9b44da1e0233d30de94f711c2dc9996366"
+content-hash = "9b4f6d49ec859c2b1a1b7a377201719dde2ef6791e686892df1385d9f4242fae"

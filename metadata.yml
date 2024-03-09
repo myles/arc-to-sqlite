@@ -1,0 +1,77 @@
+---
+databases:
+  arc:
+    tables:
+      arc_export_files:
+        sort_desc: last_processed_at
+        label_column: file_name
+        units:
+          file_size: bytes
+      places:
+        sort: name
+        label_column: name
+        plugins:
+          datasette-cluster-map:
+            latitude_column: center_latitude
+            longitude_column: center_longitude
+      timeline_items:
+        sort_desc: end_date
+        label_column: item_id
+        plugins:
+          datasette-cluster-map:
+            latitude_column: center_latitude
+            longitude_column: center_longitude
+      samples:
+        sort_desc: date
+        label_column: sample_id
+        plugins:
+          datasette-cluster-map:
+            latitude_column: location_latitude
+            longitude_column: location_longitude
+plugins:
+  datasette-dashboards:
+    dashboard:
+      title: Dashboard
+      filters:
+        start_date:
+          label: Start date
+          type: date
+        end_date:
+          label: End date
+          type: date
+      charts:
+        total-step-count:
+          title: Total step count
+          db: arc
+          query: |
+            SELECT sum(step_count) AS steps
+            FROM timeline_items
+            WHERE
+              TRUE
+              [[ AND start_date >= date(:start_date) ]] [[ AND end_date <= date(:end_date) ]]
+          library: metric
+          display:
+            field: steps
+            prefix:
+            suffix:
+        step-count:
+            title: Step count
+            db: arc
+            query: |
+              SELECT
+                date(start_date) AS start_date,
+                sum(step_count) AS steps
+              FROM
+                timeline_items
+              WHERE
+                TRUE [[ AND start_date >= date(:start_date) ]] [[ AND end_date <= date(:end_date) ]]
+              GROUP BY
+                start_date
+              ORDER BY
+                start_date
+            library: vega-lite
+            display:
+              mark: { type: rect, tooltip: true }
+              encoding:
+                y: { field: steps, aggregate: sum, title: "Steps" }
+                x: { field: start_date, title: "Date" }
