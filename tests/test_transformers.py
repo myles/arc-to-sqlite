@@ -1,8 +1,10 @@
 import datetime
 from copy import deepcopy
 from pathlib import Path
+
 import pytest
 from freezegun import freeze_time
+
 from arc_to_sqlite import transformers
 
 from . import fixtures
@@ -121,11 +123,19 @@ def test_transform_timeline_item__no_center_and_radius():
 
 @freeze_time("2024-01-01")
 @pytest.mark.parametrize(
-    'path, expected_file_checksum, expected_export_type',
+    "path, expected_file_checksum, expected_export_type",
     (
-        (Path('/path/to/arc_export/Monthly/2024-01.json.gz'), '12345678901234567890', 'monthly'),
-        (Path('/path/to/arc_export/Daily/2024-01-01.json.gz'), '1234567890', 'daily'),
-    )
+        (
+            Path("/path/to/arc_export/Monthly/2024-01.json.gz"),
+            "12345678901234567890",
+            "monthly",
+        ),
+        (
+            Path("/path/to/arc_export/Daily/2024-01-01.json.gz"),
+            "1234567890",
+            "daily",
+        ),
+    ),
 )
 def test_transform_arc_export_file_path(
     path,
@@ -136,17 +146,20 @@ def test_transform_arc_export_file_path(
     expected_file_size = 1234
     expected_last_processed_at = datetime.datetime.now(tz=datetime.timezone.utc)
 
-    mocker.patch('arc_to_sqlite.transformers.Path.stat', return_value=mocker.Mock(st_size=expected_file_size))
+    mocker.patch(
+        "arc_to_sqlite.transformers.Path.stat",
+        return_value=mocker.Mock(st_size=expected_file_size),
+    )
 
     result = transformers.transform_arc_export_file_path(
         path,
         file_checksum=expected_file_checksum,
     )
     assert result == {
-        'file_name': path.name,
-        'file_path': str(path.absolute()),
-        'file_size': expected_file_size,
-        'file_checksum': expected_file_checksum,
-        'export_type': expected_export_type,
-        'last_processed_at': expected_last_processed_at,
+        "file_name": path.name,
+        "file_path": str(path.absolute()),
+        "file_size": expected_file_size,
+        "file_checksum": expected_file_checksum,
+        "export_type": expected_export_type,
+        "last_processed_at": expected_last_processed_at,
     }
