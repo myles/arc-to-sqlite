@@ -12,66 +12,151 @@ databases:
         label_column: name
         plugins:
           datasette-cluster-map:
-            latitude_column: center_latitude
-            longitude_column: center_longitude
+            latitude_column: latitude
+            longitude_column: longitude
       timeline_items:
-        sort_desc: end_date
+        sort_desc: ends_at
         label_column: item_id
         plugins:
           datasette-cluster-map:
-            latitude_column: center_latitude
-            longitude_column: center_longitude
+            latitude_column: latitude
+            longitude_column: longitude
       samples:
-        sort_desc: date
+        sort_desc: taken_at
         label_column: sample_id
         plugins:
           datasette-cluster-map:
-            latitude_column: location_latitude
-            longitude_column: location_longitude
+            latitude_column: latitude
+            longitude_column: longitude
 plugins:
   datasette-dashboards:
     dashboard:
-      title: Dashboard
+      title: Arc
+      layout:
+        - [steps, steps-by-day]
+        - [floors-climbed, floors-climbed-by-day]
+        - [places-visited, places-visited-table]
       filters:
-        start_date:
+        starts_at:
           label: Start date
           type: date
-        end_date:
+        ends_at:
           label: End date
           type: date
       charts:
-        total-step-count:
-          title: Total step count
+        steps:
+          title: Steps
           db: arc
           query: |
             SELECT sum(step_count) AS steps
             FROM timeline_items
             WHERE
               TRUE
-              [[ AND start_date >= date(:start_date) ]] [[ AND end_date <= date(:end_date) ]]
+              [[ AND starts_at >= date(:starts_at) ]]
+              [[ AND ends_at <= date(:ends_at) ]]
           library: metric
           display:
             field: steps
             prefix:
             suffix:
-        step-count:
-            title: Step count
-            db: arc
-            query: |
-              SELECT
-                date(start_date) AS start_date,
-                sum(step_count) AS steps
-              FROM
-                timeline_items
-              WHERE
-                TRUE [[ AND start_date >= date(:start_date) ]] [[ AND end_date <= date(:end_date) ]]
-              GROUP BY
-                start_date
-              ORDER BY
-                start_date
-            library: vega-lite
-            display:
-              mark: { type: rect, tooltip: true }
-              encoding:
-                y: { field: steps, aggregate: sum, title: "Steps" }
-                x: { field: start_date, title: "Date" }
+        steps-by-day:
+          title: Steps by day
+          db: arc
+          query: |
+            SELECT
+              date(starts_at) AS starts_at,
+              sum(step_count) AS steps
+            FROM
+              timeline_items
+            WHERE
+              TRUE
+              [[ AND starts_at >= date(:starts_at) ]]
+              [[ AND ends_at <= date(:ends_at) ]]
+            GROUP BY
+              starts_at
+            ORDER BY
+              starts_at
+          library: vega-lite
+          display:
+            mark: { type: rect, tooltip: true }
+            encoding:
+              y: { field: steps, aggregate: sum, title: "Steps" }
+              x: { field: starts_at, title: "Date" }
+        floors-climbed:
+          title: Floors climbed
+          db: arc
+          query: |
+            SELECT sum(floors_ascended) AS floors
+            FROM timeline_items
+            WHERE
+              TRUE
+              [[ AND starts_at >= date(:starts_at) ]]
+              [[ AND ends_at <= date(:ends_at) ]]
+          library: metric
+          display:
+            field: floors
+            prefix:
+            suffix:
+        floors-climbed-by-day:
+          title: Floors climbed by day
+          db: arc
+          query: |
+            SELECT
+              date(starts_at) AS starts_at,
+              sum(floors_ascended) AS floors
+            FROM
+              timeline_items
+            WHERE
+              TRUE
+              [[ AND starts_at >= date(:starts_at) ]]
+              [[ AND ends_at <= date(:ends_at) ]]
+            GROUP BY
+              starts_at
+            ORDER BY
+              starts_at
+          library: vega-lite
+          display:
+            mark: { type: rect, tooltip: true }
+            encoding:
+              y: { field: floors, aggregate: sum, title: "Floors climbed" }
+              x: { field: starts_at, title: "Date" }
+        places-visited:
+          title: Map
+          db: arc
+          query: |
+            SELECT
+              latitude,
+              longitude
+            FROM
+              timeline_items
+            WHERE
+              latitude IS NOT NULL
+              AND longitude IS NOT NULL
+              [[ AND starts_at >= date(:starts_at) ]]
+              [[ AND ends_at <= date(:ends_at) ]]
+            LIMIT 1000
+          library: map
+          display:
+            latitude_column: latitude
+            longitude_column: longitude
+        places-visited-table:
+          title: Top places visited
+          db: arc
+          query: |
+            SELECT
+              places.name AS "Place name",
+              unixepoch(ends_at) - unixepoch(starts_at) AS "Seconds spent"
+            FROM
+              timeline_items
+              INNER JOIN places ON places.place_id = timeline_items.place_id
+            WHERE
+              timeline_items.place_id IS NOT NULL
+              [[ AND starts_at >= date(:starts_at) ]]
+              [[ AND ends_at <= date(:ends_at) ]]
+            GROUP BY
+              "Place name"
+            ORDER BY
+              "Seconds spent" DESC,
+              "Place name"
+            LIMIT 10
+          library: table

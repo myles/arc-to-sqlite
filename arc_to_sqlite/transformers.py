@@ -19,16 +19,18 @@ def transform_place(place: Dict[str, Any]):
     """
     Transform the place data from the Arc JSON to the SQLite schema.
     """
+    place["last_saved_at"] = place.pop("lastSaved")
+
     radius = place.pop("radius")
     for key, value in radius.items():
         place[f"radius_{convert_to_snake_case(key)}"] = value
 
     center = place.pop("center")
     for key, value in center.items():
-        place[f"center_{convert_to_snake_case(key)}"] = value
+        place[convert_to_snake_case(key)] = value
 
     # Convert the keys to snake_case
-    to_convert = ["streetAddress", "lastSaved", "placeId", "secondsFromGMT"]
+    to_convert = ["streetAddress", "placeId", "secondsFromGMT"]
     for key in to_convert:
         place[convert_to_snake_case(key)] = place.pop(key)
 
@@ -41,12 +43,12 @@ def transform_place(place: Dict[str, Any]):
             "place_id",
             "name",
             "street_address",
-            "center_latitude",
-            "center_longitude",
+            "latitude",
+            "longitude",
             "radius_sd",
             "radius_mean",
             "seconds_from_gmt",
-            "last_saved",
+            "last_saved_at",
         )
     ]
     for key in to_remove:
@@ -59,9 +61,14 @@ def transform_sample(sample: Dict[str, Any]):
     """
     Transform the sample data from the Arc JSON to the SQLite schema.
     """
+    sample["taken_at"] = sample.pop("date")
+    sample["last_saved_at"] = sample.pop("lastSaved")
+
+    # Extract the location data
     location = sample.pop("location", None) or {}
+    location.pop("timestamp", None)
     for key, value in location.items():
-        sample[f"location_{convert_to_snake_case(key)}"] = value
+        sample[convert_to_snake_case(key)] = value
 
     # Convert the keys to snake_case
     to_convert = [
@@ -74,7 +81,6 @@ def transform_sample(sample: Dict[str, Any]):
         "recordingState",
         "stepHz",
         "timelineItemId",
-        "lastSaved",
     ]
     for key in to_convert:
         if key not in sample:
@@ -88,21 +94,19 @@ def transform_sample(sample: Dict[str, Any]):
         for k in sample.keys()
         if k
         not in (
-            "date",
-            "location_latitude",
-            "location_longitude",
-            "location_speed",
-            "location_timestamp",
-            "location_horizontal_accuracy",
-            "location_vertical_accuracy",
-            "location_altitude",
-            "location_course",
-            "location_horizontal_accuracy",
-            "location_vertical_accuracy",
-            "location_speed",
-            "location_timestamp",
-            "location_longitude",
-            "location_latitude",
+            "latitude",
+            "longitude",
+            "speed",
+            "timestamp",
+            "horizontal_accuracy",
+            "vertical_accuracy",
+            "altitude",
+            "course",
+            "horizontal_accuracy",
+            "vertical_accuracy",
+            "speed",
+            "longitude",
+            "latitude",
             "seconds_from_gmt",
             "sample_id",
             "moving_state",
@@ -110,9 +114,10 @@ def transform_sample(sample: Dict[str, Any]):
             "recording_state",
             "step_hz",
             "timeline_item_id",
-            "last_saved",
             "course_variance",
             "z_acceleration",
+            "last_saved_at",
+            "taken_at",
         )
     ]
     for key in to_remove:
@@ -128,9 +133,13 @@ def transform_timeline_item(timeline_item: Dict[str, Any]):
     """
     Transform the timeline item data from the Arc JSON to the SQLite schema.
     """
+    timeline_item["last_saved_at"] = timeline_item.pop("lastSaved")
+    timeline_item["starts_at"] = timeline_item.pop("startDate")
+    timeline_item["ends_at"] = timeline_item.pop("endDate")
+
     center = timeline_item.pop("center", None) or {}
     for key, value in center.items():
-        timeline_item[f"center_{convert_to_snake_case(key)}"] = value
+        timeline_item[convert_to_snake_case(key)] = value
 
     radius = timeline_item.pop("radius", None) or {}
     for key, value in radius.items():
@@ -143,14 +152,11 @@ def transform_timeline_item(timeline_item: Dict[str, Any]):
         "altitude",
         "averageHeartRate",
         "streetAddress",
-        "lastSaved",
         "isVisit",
         "manualPlace",
-        "startDate",
         "maxHeartRate",
         "stepCount",
         "nextItemId",
-        "endDate",
         "placeId",
         "previousItemId",
         "floorsDescended",
@@ -169,8 +175,8 @@ def transform_timeline_item(timeline_item: Dict[str, Any]):
         for k in timeline_item.keys()
         if k
         not in (
-            "center_latitude",
-            "center_longitude",
+            "latitude",
+            "longitude",
             "radius_sd",
             "radius_mean",
             "hk_step_count",
@@ -178,19 +184,20 @@ def transform_timeline_item(timeline_item: Dict[str, Any]):
             "altitude",
             "average_heart_rate",
             "street_address",
-            "last_saved",
+            "last_saved_at",
             "is_visit",
             "manual_place",
-            "start_date",
+            "starts_at",
             "max_heart_rate",
             "step_count",
             "next_item_id",
-            "end_date",
+            "ends_at",
             "place_id",
             "previous_item_id",
             "floors_descended",
             "active_energy_burned",
             "item_id",
+            "last_saved_at",
         )
     ]
     for key in to_remove:

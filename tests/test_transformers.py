@@ -29,14 +29,14 @@ def test_transform_place():
     result = transformers.transform_place(fixtures.PLACE_ONE)
     assert result == {
         "place_id": fixtures.PLACE_ONE_ID,
-        "street_address": place["streetAddress"],
         "name": place["name"],
-        "last_saved": place["lastSaved"],
-        "seconds_from_gmt": place["secondsFromGMT"],
-        "center_latitude": place["center"]["latitude"],
-        "center_longitude": place["center"]["longitude"],
+        "street_address": place["streetAddress"],
+        "latitude": place["center"]["latitude"],
+        "longitude": place["center"]["longitude"],
         "radius_sd": place["radius"]["sd"],
         "radius_mean": place["radius"]["mean"],
+        "last_saved_at": place["lastSaved"],
+        "seconds_from_gmt": place["secondsFromGMT"],
     }
 
 
@@ -47,23 +47,20 @@ def test_transform_sample():
         "sample_id": fixtures.SAMPLE_ONE_ID,
         "timeline_item_id": fixtures.TIMELINE_ITEM_ONE_ID,
         "step_hz": sample["stepHz"],
-        "date": sample["date"],
+        "taken_at": sample["date"],
         "recording_state": sample["recordingState"],
         "xy_acceleration": sample["xyAcceleration"],
         "seconds_from_gmt": sample["secondsFromGMT"],
         "course_variance": sample["courseVariance"],
-        "last_saved": sample["lastSaved"],
+        "last_saved_at": sample["lastSaved"],
         "z_acceleration": sample["zAcceleration"],
-        "location_speed": sample["location"]["speed"],
-        "location_longitude": sample["location"]["longitude"],
-        "location_altitude": sample["location"]["altitude"],
-        "location_course": sample["location"]["course"],
-        "location_timestamp": sample["location"]["timestamp"],
-        "location_horizontal_accuracy": sample["location"][
-            "horizontalAccuracy"
-        ],
-        "location_latitude": sample["location"]["latitude"],
-        "location_vertical_accuracy": sample["location"]["verticalAccuracy"],
+        "speed": sample["location"]["speed"],
+        "longitude": sample["location"]["longitude"],
+        "altitude": sample["location"]["altitude"],
+        "course": sample["location"]["course"],
+        "horizontal_accuracy": sample["location"]["horizontalAccuracy"],
+        "latitude": sample["location"]["latitude"],
+        "vertical_accuracy": sample["location"]["verticalAccuracy"],
         "moving_state": sample["movingState"],
     }
 
@@ -72,14 +69,14 @@ def test_transform_sample__no_location():
     sample = deepcopy(fixtures.SAMPLE_TWO)
 
     result = transformers.transform_sample(sample)
-    assert "location_speed" not in result
-    assert "location_longitude" not in result
-    assert "location_altitude" not in result
-    assert "location_course" not in result
-    assert "location_timestamp" not in result
-    assert "location_horizontal_accuracy" not in result
-    assert "location_latitude" not in result
-    assert "location_vertical_accuracy" not in result
+    assert "speed" not in result
+    assert "longitude" not in result
+    assert "altitude" not in result
+    assert "course" not in result
+    assert "timestamp" not in result
+    assert "horizontal_accuracy" not in result
+    assert "latitude" not in result
+    assert "vertical_accuracy" not in result
 
 
 def test_transform_timeline_item():
@@ -91,18 +88,18 @@ def test_transform_timeline_item():
         "hk_step_count": timeline_item["hkStepCount"],
         "floors_ascended": timeline_item["floorsAscended"],
         "altitude": timeline_item["altitude"],
-        "center_latitude": timeline_item["center"]["latitude"],
-        "center_longitude": timeline_item["center"]["longitude"],
+        "latitude": timeline_item["center"]["latitude"],
+        "longitude": timeline_item["center"]["longitude"],
         "average_heart_rate": timeline_item["averageHeartRate"],
         "street_address": timeline_item["streetAddress"],
-        "last_saved": timeline_item["lastSaved"],
+        "last_saved_at": timeline_item["lastSaved"],
         "is_visit": timeline_item["isVisit"],
         "manual_place": timeline_item["manualPlace"],
-        "start_date": timeline_item["startDate"],
+        "starts_at": timeline_item["startDate"],
         "max_heart_rate": timeline_item["maxHeartRate"],
         "step_count": timeline_item["stepCount"],
         "next_item_id": timeline_item["nextItemId"],
-        "end_date": timeline_item["endDate"],
+        "ends_at": timeline_item["endDate"],
         "radius_mean": timeline_item["radius"]["mean"],
         "radius_sd": timeline_item["radius"]["sd"],
         "previous_item_id": timeline_item["previousItemId"],
@@ -115,8 +112,8 @@ def test_transform_timeline_item__no_center_and_radius():
     timeline_item = deepcopy(fixtures.TIMELINE_ITEM_TWO)
 
     result = transformers.transform_timeline_item(timeline_item)
-    assert "center_latitude" not in result
-    assert "center_longitude" not in result
+    assert "latitude" not in result
+    assert "longitude" not in result
     assert "radius_mean" not in result
     assert "radius_sd" not in result
 

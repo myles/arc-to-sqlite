@@ -2,6 +2,7 @@ import datetime
 import gzip
 import hashlib
 import json
+import logging
 from pathlib import Path
 from typing import Any, BinaryIO, Dict, Generator, List, Tuple, Union
 
@@ -13,6 +14,8 @@ from .transformers import (
     transform_sample,
     transform_timeline_item,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def open_database(db_file_path: Path) -> Database:
@@ -62,6 +65,7 @@ def build_database(db: Database):
             },
             pk="id",
         )
+        logger.info(f"Created the {arc_export_files_table.name} table.")
 
     if places_table.exists() is False:
         places_table.create(
@@ -69,20 +73,21 @@ def build_database(db: Database):
                 "place_id": str,
                 "name": str,
                 "street_address": str,
-                "center_latitude": float,
-                "center_longitude": float,
+                "latitude": float,
+                "longitude": float,
                 "radius_sd": float,
                 "radius_mean": float,
                 "seconds_from_gmt": int,
-                "last_saved": datetime.datetime,
+                "last_saved_at": datetime.datetime,
             },
             pk="place_id",
         )
         places_table.enable_fts(
             ["name", "street_address"], create_triggers=True
         )
+        logger.info(f"Created the {places_table.name} table.")
 
-    create_table_indexes(places_table, ["center_latitude", "center_longitude"])
+    create_table_indexes(places_table, ["latitude", "longitude"])
 
     if timeline_items_table.exists() is False:
         timeline_items_table.create(
@@ -91,24 +96,24 @@ def build_database(db: Database):
                 "next_item_id": str,
                 "previous_item_id": str,
                 "place_id": str,
-                "hk_step_count": int,
-                "floors_ascended": int,
+                "starts_at": datetime.datetime,
+                "ends_at": datetime.datetime,
+                "latitude": float,
+                "longitude": float,
                 "altitude": float,
-                "center_latitude": float,
-                "center_longitude": float,
-                "average_heart_rate": float,
-                "street_address": str,
-                "last_saved": datetime.datetime,
-                "is_visit": bool,
-                "manual_place": bool,
-                "start_date": datetime.datetime,
-                "max_heart_rate": int,
-                "step_count": int,
-                "end_date": datetime.datetime,
-                "floors_descended": int,
-                "active_energy_burned": float,
                 "radius_sd": float,
                 "radius_mean": float,
+                "step_count": int,
+                "hk_step_count": int,
+                "floors_ascended": int,
+                "floors_descended": int,
+                "street_address": str,
+                "manual_place": bool,
+                "is_visit": bool,
+                "average_heart_rate": float,
+                "max_heart_rate": int,
+                "active_energy_burned": float,
+                "last_saved_at": datetime.datetime,
             },
             pk="item_id",
             foreign_keys=(
@@ -120,6 +125,7 @@ def build_database(db: Database):
         timeline_items_table.enable_fts(
             ["street_address"], create_triggers=True
         )
+        logger.info(f"Created the {timeline_items_table.name} table.")
 
     create_table_indexes(
         timeline_items_table,
@@ -127,10 +133,10 @@ def build_database(db: Database):
             "next_item_id",
             "previous_item_id",
             "place_id",
-            "center_latitude",
-            "center_longitude",
-            "start_date",
-            "end_date",
+            "latitude",
+            "longitude",
+            "starts_at",
+            "ends_at",
         ],
     )
 
@@ -139,36 +145,31 @@ def build_database(db: Database):
             columns={
                 "sample_id": str,
                 "timeline_item_id": str,
-                "date": datetime.datetime,
+                "taken_at": datetime.datetime,
+                "latitude": float,
+                "longitude": float,
+                "altitude": float,
                 "recording_state": str,
-                "xy_acceleration": float,
-                "seconds_from_gmt": int,
-                "course_variance": int,
-                "last_saved": datetime.datetime,
-                "z_acceleration": float,
-                "location_speed": float,
-                "location_longitude": float,
-                "location_altitude": float,
-                "location_course": float,
-                "location_timestamp": datetime.datetime,
-                "location_horizontal_accuracy": float,
-                "location_latitude": float,
-                "location_vertical_accuracy": float,
                 "moving_state": str,
+                "xy_acceleration": float,
+                "z_acceleration": float,
+                "course": float,
+                "course_variance": int,
+                "speed": float,
+                "horizontal_accuracy": float,
+                "vertical_accuracy": float,
                 "step_hz": float,
+                "seconds_from_gmt": int,
+                "last_saved_at": datetime.datetime,
             },
             pk="sample_id",
             foreign_keys=(("timeline_item_id", "timeline_items", "item_id"),),
         )
+        logger.info(f"Created the {samples_table.name} table.")
 
     create_table_indexes(
         samples_table,
-        [
-            "timeline_item_id",
-            "date",
-            "location_longitude",
-            "location_latitude",
-        ],
+        indexes=["timeline_item_id", "taken_at", "longitude", "latitude"],
     )
 
 
@@ -301,7 +302,11 @@ def process_arc_export_file(db: Database, file_path: Path):
     if arc_export_file_values is not None:
         arc_export_file_row_id, arc_export_file_data = arc_export_file_values
 
+        # If the file checksum is the same, we don't need to process it again.
         if arc_export_file_data["file_checksum"] == file_checksum:
+            logger.info(
+                f"Skipping file {file_path.name} because it has already been processed."
+            )
             return
     else:
         arc_export_file_row_id = None

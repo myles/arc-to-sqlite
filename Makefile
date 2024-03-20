@@ -41,6 +41,5 @@ datasette:
 	poetry run datasette serve arc.db \
 		--metadata metadata.yml
 
-
 .PHONY: ci
 ci: setup test lint mypy
