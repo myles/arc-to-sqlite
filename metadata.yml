@@ -145,8 +145,11 @@ plugins:
           db: arc
           query: |
             SELECT
-              places.name AS "Place name",
-              unixepoch(ends_at) - unixepoch(starts_at) AS "Seconds spent"
+              "<a href='/arc/places/" || places.place_id || "'>" || places.name || "</a>" AS "<strong>Place name</strong>",
+              round(
+                sum(unixepoch(ends_at) - unixepoch(starts_at)) / 60.9 / 60.0,
+                2
+              ) AS "<strong>Hours spent</strong>"
             FROM
               timeline_items
               INNER JOIN places ON places.place_id = timeline_items.place_id
@@ -155,9 +158,10 @@ plugins:
               [[ AND starts_at >= date(:starts_at) ]]
               [[ AND ends_at <= date(:ends_at) ]]
             GROUP BY
-              "Place name"
+              places.place_id
             ORDER BY
-              "Seconds spent" DESC,
-              "Place name"
-            LIMIT 10
+              "<strong>Hours spent</strong>" DESC,
+              places.place_id
+            LIMIT
+              10
           library: table

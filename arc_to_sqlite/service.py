@@ -200,6 +200,7 @@ def update_or_insert(
     )
     row_pk, _ = next(existing_rows, (None, None))
 
+    # Check if there are multiple rows for the given query.
     try:
         next(existing_rows)
         raise ValueError("Multiple rows found for the given query.")
