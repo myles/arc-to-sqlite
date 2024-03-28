@@ -3,8 +3,8 @@ import gzip
 import hashlib
 import json
 import logging
+import typing as t
 from pathlib import Path
-from typing import Any, BinaryIO, Dict, Generator, List, Tuple, Union
 
 from sqlite_utils.db import Database, Table
 
@@ -32,7 +32,7 @@ def get_table(table_name: str, db: Database) -> Table:
     return Table(db=db, name=table_name)
 
 
-def create_table_indexes(table: Table, indexes: List[str]):
+def create_table_indexes(table: Table, indexes: t.List[str]):
     """
     Create indexes for a given table.
     """
@@ -79,8 +79,10 @@ def build_database(db: Database):
                 "radius_mean": float,
                 "seconds_from_gmt": int,
                 "last_saved_at": datetime.datetime,
+                "arc_export_file_id": int,
             },
             pk="place_id",
+            foreign_keys=(("arc_export_file_id", "arc_export_files", "id"),),
         )
         places_table.enable_fts(
             ["name", "street_address"], create_triggers=True
@@ -114,12 +116,14 @@ def build_database(db: Database):
                 "max_heart_rate": int,
                 "active_energy_burned": float,
                 "last_saved_at": datetime.datetime,
+                "arc_export_file_id": int,
             },
             pk="item_id",
             foreign_keys=(
                 ("next_item_id", "timeline_items", "item_id"),
                 ("previous_item_id", "timeline_items", "item_id"),
                 ("place_id", "places", "place_id"),
+                ("arc_export_file_id", "arc_export_files", "id"),
             ),
         )
         timeline_items_table.enable_fts(
@@ -161,9 +165,13 @@ def build_database(db: Database):
                 "step_hz": float,
                 "seconds_from_gmt": int,
                 "last_saved_at": datetime.datetime,
+                "arc_export_file_id": int,
             },
             pk="sample_id",
-            foreign_keys=(("timeline_item_id", "timeline_items", "item_id"),),
+            foreign_keys=(
+                ("timeline_item_id", "timeline_items", "item_id"),
+                ("arc_export_file_id", "arc_export_files", "id"),
+            ),
         )
         logger.info(f"Created the {samples_table.name} table.")
 
@@ -173,7 +181,38 @@ def build_database(db: Database):
     )
 
 
-def calculate_file_obj_checksum(file_obj: BinaryIO) -> str:
+def update_or_insert(
+    table: Table,
+    *,
+    defaults: t.Optional[t.Dict[str, t.Any]] = None,
+    create_defaults: t.Optional[t.Dict[str, t.Any]] = None,
+    **kwargs,
+) -> Table:
+    """
+    Update or insert a row in a SQLite table.
+    """
+    defaults = defaults or {}
+    create_defaults = create_defaults or {}
+
+    existing_rows = table.pks_and_rows_where(
+        where=" AND ".join(f"{k} = :{k}" for k in kwargs),
+        where_args=kwargs,
+    )
+    row_pk, _ = next(existing_rows, (None, None))
+
+    try:
+        next(existing_rows)
+        raise ValueError("Multiple rows found for the given query.")
+    except StopIteration:
+        ...
+
+    if row_pk is not None:
+        return table.update(pk_values=row_pk, updates={**defaults, **kwargs})
+
+    return table.insert(record={**kwargs, **defaults, **create_defaults})
+
+
+def calculate_file_obj_checksum(file_obj: t.BinaryIO) -> str:
     """
     Calculate the checksum of a file.
     """
@@ -186,7 +225,7 @@ def calculate_file_obj_checksum(file_obj: BinaryIO) -> str:
 
 def get_arc_export_file_row(
     file_name: str, table: Table
-) -> Union[Tuple[int, Dict[str, Any]], None]:
+) -> t.Union[t.Tuple[int, t.Dict[str, t.Any]], None]:
     """
     Get the Arc export file metadata from the SQLite database.
     """
@@ -206,7 +245,7 @@ def get_arc_export_file_row(
 def save_arc_export_file(
     path: Path,
     file_checksum: str,
-    row_id: Union[int, None],
+    row_id: t.Union[int, None],
     table: Table,
 ) -> Table:
     """
@@ -223,39 +262,59 @@ def save_arc_export_file(
     return table.update(row_id, data)
 
 
-def save_places(places: List[Dict[str, Any]], places_table: Table):
+def save_places(
+    places: t.List[t.Dict[str, t.Any]],
+    arc_export_file_id: int,
+    places_table: Table,
+):
     """
     Save the places data to the SQLite database.
     """
     for place in places:
         transform_place(place)
+        place_id = place.pop("place_id")
 
-    places_table.upsert_all(places, pk="place_id")
+        update_or_insert(
+            table=places_table,
+            defaults=place,
+            create_defaults={"arc_export_file_id": arc_export_file_id},
+            place_id=place_id,
+        )
 
 
 def save_timeline_items(
-    timeline_items: List[Dict[str, Any]], timeline_items_table: Table
+    timeline_items: t.List[t.Dict[str, t.Any]],
+    arc_export_file_id: int,
+    timeline_items_table: Table,
 ):
     """
     Save the timeline items data to the SQLite database.
     """
     for item in timeline_items:
         transform_timeline_item(item)
+        item["arc_export_file_id"] = arc_export_file_id
 
     timeline_items_table.upsert_all(timeline_items, pk="item_id")
 
 
-def save_samples(samples: List[Dict[str, Any]], samples_table: Table):
+def save_samples(
+    samples: t.List[t.Dict[str, t.Any]],
+    arc_export_file_id: int,
+    samples_table: Table,
+):
     """
     Save the samples data to the SQLite database.
     """
     for sample in samples:
         transform_sample(sample)
+        sample["arc_export_file_id"] = arc_export_file_id
 
     samples_table.upsert_all(samples, pk="sample_id")
 
 
-def list_arc_export_files(arc_export_path: Path) -> Generator[Path, None, None]:
+def list_arc_export_files(
+    arc_export_path: Path,
+) -> t.Generator[Path, None, None]:
     """
     List the Arc export files in the given directory.
     """
@@ -265,8 +324,12 @@ def list_arc_export_files(arc_export_path: Path) -> Generator[Path, None, None]:
 
 
 def extract_places_and_samples_from_timeline_items(
-    timeline_items: List[Dict[str, Any]],
-) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]], List[Dict[str, Any]]]:
+    timeline_items: t.List[t.Dict[str, t.Any]],
+) -> t.Tuple[
+    t.List[t.Dict[str, t.Any]],
+    t.List[t.Dict[str, t.Any]],
+    t.List[t.Dict[str, t.Any]],
+]:
     """
     Extract places and samples from the timeline items.
     """
@@ -311,12 +374,17 @@ def process_arc_export_file(db: Database, file_path: Path):
     else:
         arc_export_file_row_id = None
 
-    save_arc_export_file(
+    arc_export_files_table = save_arc_export_file(
         file_path,
         file_checksum=file_checksum,
         row_id=arc_export_file_row_id,
         table=arc_export_files_table,
     )
+    arc_export_file_row_id = arc_export_files_table.last_rowid
+    if arc_export_file_row_id is None:
+        raise ValueError(
+            "The arc_export_files row failed to save to the database."
+        )
 
     # Load the Arc export data and save it to the database.
     with gzip.open(file_path, "rb") as file_obj:
@@ -330,6 +398,18 @@ def process_arc_export_file(db: Database, file_path: Path):
     timeline_items_table = get_table("timeline_items", db=db)
     samples_table = get_table("samples", db=db)
 
-    save_places(places, places_table)
-    save_timeline_items(timeline_items, timeline_items_table)
-    save_samples(samples, samples_table)
+    save_places(
+        places,
+        arc_export_file_id=arc_export_file_row_id,
+        places_table=places_table,
+    )
+    save_timeline_items(
+        timeline_items,
+        arc_export_file_id=arc_export_file_row_id,
+        timeline_items_table=timeline_items_table,
+    )
+    save_samples(
+        samples,
+        arc_export_file_id=arc_export_file_row_id,
+        samples_table=samples_table,
+    )

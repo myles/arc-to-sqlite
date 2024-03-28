@@ -12,6 +12,49 @@ def test_build_database(mock_db):
     assert mock_db["places"].exists() is True
 
 
+def test_update_or_insert(mock_db):
+    table = mock_db.create_table(
+        name="test_update_or_insert",
+        columns={
+            "id": int,
+            "title": str,
+            "body": str,
+            "tags": str,
+        },
+        pk="id",
+    )
+
+    table = service.update_or_insert(
+        table,
+        title="Hello, World!",
+        defaults={"body": "I'm testing the update_or_insert service function."},
+        create_defaults={"tags": "mock_db, test"},
+    )
+    assert table.count == 1
+    row = table.get(table.last_rowid)
+    assert row == {
+        "id": table.last_rowid,
+        "title": "Hello, World!",
+        "body": "I'm testing the update_or_insert service function.",
+        "tags": "mock_db, test",
+    }
+
+    table = service.update_or_insert(
+        table,
+        title="Hello, World!",
+        defaults={"body": "Testing running the function again!"},
+        create_defaults={"tags": "test"},
+    )
+    assert table.count == 1
+    row = table.get(table.last_rowid)
+    assert row == {
+        "id": table.last_rowid,
+        "title": "Hello, World!",
+        "body": "Testing running the function again!",
+        "tags": "mock_db, test",
+    }
+
+
 def test_calculate_file_obj_checksum():
     file_obj = BytesIO(b"test")
 

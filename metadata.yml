@@ -3,10 +3,11 @@ databases:
   arc:
     tables:
       arc_export_files:
-        sort_desc: last_processed_at
+        sort_desc: file_name
         label_column: file_name
         units:
           file_size: bytes
+          active_energy_burned: calorie
       places:
         sort: name
         label_column: name

@@ -44,7 +44,12 @@ def cli(
     else:
         arc_export_path = arc_json_export_path / "Daily"
 
-    arc_export_file_paths = service.list_arc_export_files(arc_export_path)
+    # Get the list of export files and process them.
+    # Transforming this from a generator to a list, so we can sort it and show
+    # a progress bar.
+    arc_export_file_paths = list(service.list_arc_export_files(arc_export_path))
+    arc_export_file_paths = sorted(arc_export_file_paths, key=lambda p: p.name)
+
     with click.progressbar(
         arc_export_file_paths,
         label=f"Processing {export_type} export files",
