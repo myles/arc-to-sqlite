@@ -381,7 +381,7 @@ def process_arc_export_file(db: Database, file_path: Path):
         row_id=arc_export_file_row_id,
         table=arc_export_files_table,
     )
-    arc_export_file_row_id = arc_export_files_table.last_rowid
+    arc_export_file_row_id = arc_export_files_table.last_pk
     if arc_export_file_row_id is None:
         raise ValueError(
             "The arc_export_files row failed to save to the database."
