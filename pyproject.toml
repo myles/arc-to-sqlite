@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "arc-to-sqlite"
-version = "0.1.0"
+version = "0.1.1"
 description = ""
 authors = ["Myles Braithwaite <me@mylesbraithwaite.com>"]
 readme = "README.md"
