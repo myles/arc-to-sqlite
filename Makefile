@@ -36,6 +36,11 @@ clean:
 	rm -f coverage.xml
 	find . -type f -name '*.py[co]' -delete -o -type d -name __pycache__ -delete
 
+.PHONY: arc.db
+arc.db:
+	poetry run arc-to-sqlite arc.db \
+		~/Library/Mobile\ Documents/iCloud\~com\~bigpaua\~LearnerCoacher/
+
 .PHONY: datasette
 datasette:
 	poetry run datasette serve arc.db \
