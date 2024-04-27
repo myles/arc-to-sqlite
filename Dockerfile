@@ -1,4 +1,6 @@
 FROM python:3.11-alpine
+LABEL org.opencontainers.image.source="https://github.com/myles/arc-to-sqlite"
+LABEL org.opencontainers.image.description="Save data from Arc App's daily (or monthly) export to a SQLite database."
 
 RUN pip install poetry==1.8.2
 
