@@ -30,9 +30,23 @@ def transform_place(place: Dict[str, Any]):
         place[convert_to_snake_case(key)] = value
 
     # Convert the keys to snake_case
-    to_convert = ["streetAddress", "placeId", "secondsFromGMT"]
+    to_convert = [
+        k
+        for k in place.keys()
+        if k
+        in (
+            "placeId",
+            "streetAddress",
+            "secondsFromGMT",
+            "mapboxCategory",
+            "mapboxPlaceId",
+            "googlePrimaryType",
+            "googlePlaceId",
+        )
+    ]
     for key in to_convert:
-        place[convert_to_snake_case(key)] = place.pop(key)
+        if key in place:
+            place[convert_to_snake_case(key)] = place.pop(key)
 
     # Remove any keys that are not in the schema
     to_remove = [
@@ -49,6 +63,10 @@ def transform_place(place: Dict[str, Any]):
             "radius_mean",
             "seconds_from_gmt",
             "last_saved_at",
+            "mapbox_category",
+            "mapbox_place_id",
+            "google_primary_type",
+            "google_place_id",
         )
     ]
     for key in to_remove:
@@ -162,6 +180,11 @@ def transform_timeline_item(timeline_item: Dict[str, Any]):
         "floorsDescended",
         "activeEnergyBurned",
         "itemId",
+        "activityType",
+        "activityTypeConfidenceScore",
+        "manualActivityType",
+        "uncertainActivityType",
+        "unknownActivityType",
     ]
     for key in to_convert:
         if key not in timeline_item:
@@ -198,6 +221,11 @@ def transform_timeline_item(timeline_item: Dict[str, Any]):
             "active_energy_burned",
             "item_id",
             "last_saved_at",
+            "activity_type",
+            "activity_type_confidence_score",
+            "manual_activity_type",
+            "uncertain_activity_type",
+            "unknown_activity_type",
         )
     ]
     for key in to_remove:
