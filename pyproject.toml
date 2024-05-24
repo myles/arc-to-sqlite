@@ -12,6 +12,7 @@ sqlite-utils = "^3.36"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.2.0"
+bpython = "^0.24"
 freezegun = "^1.4.0"
 isort = "^5.13.2"
 mypy = "^1.8.0"

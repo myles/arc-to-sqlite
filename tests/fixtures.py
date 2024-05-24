@@ -10,12 +10,9 @@ TIMELINE_ITEM_ONE_ID = "CD40927B-234F-4969-9AC6-162377BC1420"
 TIMELINE_ITEM_TWO_ID = "16DB7533-F7DF-4049-AA6C-80D09EBABCC0"
 
 SAMPLE_ONE = {
-    "movingState": "moving",
+    "courseVariance": 0.04674363583353203,
     "date": "2024-05-21T17:25:47Z",
-    "zAcceleration": 0.5412744957771787,
-    "sampleId": SAMPLE_ONE_ID,
     "lastSaved": "2024-05-21T17:29:15Z",
-    "secondsFromGMT": -14400,
     "location": {
         "course": 303.3725673485157,
         "timestamp": "2024-05-21T17:25:47Z",
@@ -26,11 +23,14 @@ SAMPLE_ONE = {
         "horizontalAccuracy": 14.390501150304601,
         "latitude": 43.64544093961851,
     },
+    "movingState": "moving",
     "recordingState": "recording",
-    "courseVariance": 0.04674363583353203,
+    "sampleId": SAMPLE_ONE_ID,
+    "secondsFromGMT": -14400,
     "stepHz": 1.923324704170227,
-    "xyAcceleration": 0.7052750449750282,
     "timelineItemId": TIMELINE_ITEM_ONE_ID,
+    "xyAcceleration": 0.7052750449750282,
+    "zAcceleration": 0.5412744957771787,
 }
 
 TRANSFORMED_SAMPLE_ONE = {
@@ -55,7 +55,9 @@ TRANSFORMED_SAMPLE_ONE = {
 }
 
 SAMPLE_TWO = {
-    "xyAcceleration": 3.341598249596829,
+    "courseVariance": 0.00700875460490713,
+    "date": "2024-05-21T17:43:29Z",
+    "lastSaved": "2024-05-21T18:21:43Z",
     "location": {
         "altitude": 95.07555516006282,
         "horizontalAccuracy": 14.492842487107929,
@@ -66,16 +68,14 @@ SAMPLE_TWO = {
         "latitude": 43.64855618082636,
         "speed": 0.8521664198402463,
     },
-    "zAcceleration": 2.089857692656623,
-    "lastSaved": "2024-05-21T18:21:43Z",
-    "sampleId": SAMPLE_TWO_ID,
     "movingState": "moving",
-    "timelineItemId": TIMELINE_ITEM_TWO_ID,
-    "secondsFromGMT": -14400,
     "recordingState": "recording",
-    "date": "2024-05-21T17:43:29Z",
+    "sampleId": SAMPLE_TWO_ID,
+    "secondsFromGMT": -14400,
     "stepHz": 1.9765706062316895,
-    "courseVariance": 0.00700875460490713,
+    "timelineItemId": TIMELINE_ITEM_TWO_ID,
+    "xyAcceleration": 3.341598249596829,
+    "zAcceleration": 2.089857692656623,
 }
 
 TRANSFORMED_SAMPLE_TWO = {
@@ -100,17 +100,17 @@ TRANSFORMED_SAMPLE_TWO = {
 }
 
 SAMPLE_THREE = {
+    "courseVariance": 0.00700875460490713,
+    "date": "2024-05-21T17:43:29Z",
+    "lastSaved": "2024-05-21T18:21:43Z",
+    "movingState": "moving",
+    "recordingState": "recording",
+    "sampleId": SAMPLE_THREE_ID,
+    "secondsFromGMT": -14400,
+    "stepHz": 1.9765706062316895,
+    "timelineItemId": "16DB7533-F7DF-4049-AA6C-80D09EBABCC0",
     "xyAcceleration": 3.341598249596829,
     "zAcceleration": 2.089857692656623,
-    "lastSaved": "2024-05-21T18:21:43Z",
-    "sampleId": SAMPLE_THREE_ID,
-    "movingState": "moving",
-    "timelineItemId": TIMELINE_ITEM_TWO_ID,
-    "secondsFromGMT": -14400,
-    "recordingState": "recording",
-    "date": "2024-05-21T17:43:29Z",
-    "stepHz": 1.9765706062316895,
-    "courseVariance": 0.00700875460490713,
 }
 
 TRANSFORMED_SAMPLE_THREE = {
