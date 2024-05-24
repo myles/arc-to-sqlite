@@ -26,6 +26,7 @@ ruff = "^0.4.4"
 datasette = "^0.64.6"
 datasette-cluster-map = "^0.18.1"
 datasette-dashboards = "^0.6.2"
+datasette-ics = "^0.5.2"
 datasette-leaflet = "^0.2.2"
 
 [tool.poetry.scripts]

@@ -29,6 +29,20 @@ databases:
           datasette-cluster-map:
             latitude_column: latitude
             longitude_column: longitude
+    queries:
+      calendar:
+        title: Timeline Calendar
+        sql: |
+          SELECT
+            timeline_items.item_id AS event_uid,
+            places.name AS event_name,
+            timeline_items.starts_at AS event_dtstart,
+            timeline_items.ends_at AS event_dtend
+          FROM
+            timeline_items
+            INNER JOIN places ON places.place_id = timeline_items.place_id
+          ORDER BY
+            timeline_items.starts_at DESC
 plugins:
   datasette-dashboards:
     dashboard:
