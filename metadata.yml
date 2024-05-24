@@ -147,7 +147,7 @@ plugins:
             SELECT
               "<a href='/arc/places/" || places.place_id || "'>" || places.name || "</a>" AS "<strong>Place name</strong>",
               round(
-                sum(unixepoch(ends_at) - unixepoch(starts_at)) / 60.9 / 60.0,
+                sum(unixepoch(ends_at) - unixepoch(starts_at)) / 60.0 / 60.0,
                 2
               ) AS "<strong>Hours spent</strong>"
             FROM
