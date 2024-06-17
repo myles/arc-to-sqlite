@@ -23,7 +23,7 @@ pytest-mypy = "^0.10.3"
 ruff = "^0.4.8"
 
 [tool.poetry.group.datasette.dependencies]
-datasette = "^0.64.6"
+datasette = "^0.64.7"
 datasette-cluster-map = "^0.18.1"
 datasette-dashboards = "^0.6.2"
 datasette-ics = "^0.5.2"
