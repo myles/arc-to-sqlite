@@ -24,7 +24,7 @@ ruff = "^0.4.8"
 
 [tool.poetry.group.datasette.dependencies]
 datasette = "^0.64.6"
-datasette-cluster-map = "^0.18.1"
+datasette-cluster-map = "^0.18.2"
 datasette-dashboards = "^0.6.2"
 datasette-ics = "^0.5.2"
 datasette-leaflet = "^0.2.2"

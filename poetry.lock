@@ -528,13 +528,13 @@ test = ["beautifulsoup4 (>=4.8.1)", "black (==22.10.0)", "blacken-docs (==1.12.1
 
 [[package]]
 name = "datasette-cluster-map"
-version = "0.18.1"
+version = "0.18.2"
 description = "Datasette plugin that shows a map for any data with latitude/longitude columns"
 optional = false
-python-versions = "*"
+python-versions = ">=3.8"
 files = [
-    {file = "datasette-cluster-map-0.18.1.tar.gz", hash = "sha256:4679f2b5abfdf5560f66898da09ed09763ad2eeb743029c8ba9bf11f05e018c9"},
-    {file = "datasette_cluster_map-0.18.1-py3-none-any.whl", hash = "sha256:43061877b064cec1db3a42bd868bb3580fb5db64e7c03f7dd7fcab224cfd8df2"},
+    {file = "datasette_cluster_map-0.18.2-py3-none-any.whl", hash = "sha256:8074cdd42a7c1c4e95d52a3c5b0029eb7e5fe978498855d1ec804adadfd2b041"},
+    {file = "datasette_cluster_map-0.18.2.tar.gz", hash = "sha256:6ae34faf0f2e3198cbfdc06faaf65ac43a4e3be02d916e4d69dd5e25abcc8b28"},
 ]
 
 [package.dependencies]
@@ -543,7 +543,7 @@ datasette-leaflet = ">=0.2.2"
 
 [package.extras]
 playwright = ["pytest-playwright"]
-test = ["httpx", "nest-asyncio", "pytest", "pytest-asyncio", "sqlite-utils"]
+test = ["datasette-test", "httpx", "nest-asyncio", "pytest", "pytest-asyncio", "sqlite-utils"]
 
 [[package]]
 name = "datasette-dashboards"
@@ -1559,4 +1559,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "13965ffb66f944301b519670a958317bd0371f4a7275c05881158648ed34c0ac"
+content-hash = "b5c9119c5186fc0f5693d2ea1bbed6cfa8c40439f8a44991a05e79e7c2494dbd"
