@@ -35,6 +35,7 @@ clean:
 	rm -f .coverage
 	rm -f coverage.xml
 	find . -type f -name '*.py[co]' -delete -o -type d -name __pycache__ -delete
+	poetry env remove --all
 
 .PHONY: arc.db
 arc.db:
@@ -44,7 +45,8 @@ arc.db:
 .PHONY: datasette
 datasette:
 	poetry run datasette serve arc.db \
-		--metadata metadata.yml
+		--metadata metadata.yml \
+		--load-extension=spatialite
 
 .PHONY: ci
 ci: setup test lint mypy
