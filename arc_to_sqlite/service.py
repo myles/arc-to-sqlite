@@ -247,9 +247,16 @@ def update_or_insert(
         ...
 
     if row_pk is not None:
-        return table.update(pk_values=row_pk, updates={**defaults, **kwargs}, conversions=conversions)
+        return table.update(
+            pk_values=row_pk,
+            updates={**defaults, **kwargs},
+            conversions=conversions,
+        )
 
-    return table.insert(record={**kwargs, **defaults, **create_defaults}, conversions=conversions)
+    return table.insert(
+        record={**kwargs, **defaults, **create_defaults},
+        conversions=conversions,
+    )
 
 
 def calculate_file_obj_checksum(file_obj: t.BinaryIO) -> str:
@@ -336,14 +343,18 @@ def save_timeline_items(
     Save the timeline items data to the SQLite database.
     """
     for item in timeline_items:
-        transform_timeline_item(item, is_spatialite_available=IS_SPATIALITE_AVAILABLE)
+        transform_timeline_item(
+            item, is_spatialite_available=IS_SPATIALITE_AVAILABLE
+        )
         item["arc_export_file_id"] = arc_export_file_id
 
     conversions = {}
     if IS_SPATIALITE_AVAILABLE:
         conversions["geometry"] = "GeomFromText(?, 4326)"
 
-    timeline_items_table.upsert_all(timeline_items, pk="item_id", conversions=conversions)
+    timeline_items_table.upsert_all(
+        timeline_items, pk="item_id", conversions=conversions
+    )
 
 
 def save_samples(
@@ -355,7 +366,9 @@ def save_samples(
     Save the samples data to the SQLite database.
     """
     for sample in samples:
-        transform_sample(sample, is_spatialite_available=IS_SPATIALITE_AVAILABLE)
+        transform_sample(
+            sample, is_spatialite_available=IS_SPATIALITE_AVAILABLE
+        )
         sample["arc_export_file_id"] = arc_export_file_id
 
     conversions = {}
