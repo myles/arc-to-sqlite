@@ -35,6 +35,7 @@ clean:
 	rm -f .coverage
 	rm -f coverage.xml
 	find . -type f -name '*.py[co]' -delete -o -type d -name __pycache__ -delete
+	poetry env remove --all
 
 .PHONY: arc.db
 arc.db:
