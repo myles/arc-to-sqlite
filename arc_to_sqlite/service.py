@@ -19,16 +19,20 @@ from .transformers import (
 logger = logging.getLogger(__name__)
 
 
-IS_SPATIALITE_AVAILABLE = find_spatialite() is not None
-
-
-def open_database(db_file_path: Path) -> Database:
+def check_spatialite_support() -> bool:
     """
-    Open the Mastodon SQLite database.
+    Check if SpatiaLite is available.
+    """
+    return find_spatialite() is not None
+
+
+def open_database(db_file_path: Path, use_spatialite: bool = False) -> Database:
+    """
+    Open the Arc SQLite database.
     """
     db = Database(db_file_path)
 
-    if IS_SPATIALITE_AVAILABLE:
+    if use_spatialite:
         db.init_spatialite(find_spatialite())
         logger.info("Spatialite extension loaded.")
 
@@ -53,7 +57,7 @@ def create_table_indexes(table: Table, indexes: t.List[str]):
             table.create_index([index])
 
 
-def build_database(db: Database):
+def build_database(db: Database, use_spatialite: bool = False):
     """
     Build the Arc Export SQLite database structure.
     """
@@ -104,7 +108,7 @@ def build_database(db: Database):
             ["name", "street_address"], create_triggers=True
         )
 
-        if IS_SPATIALITE_AVAILABLE:
+        if use_spatialite:
             places_table.add_geometry_column("geometry", "GEOMETRY")
             places_table.create_spatial_index("geometry")
 
@@ -158,7 +162,7 @@ def build_database(db: Database):
             ["street_address"], create_triggers=True
         )
 
-        if IS_SPATIALITE_AVAILABLE:
+        if use_spatialite:
             timeline_items_table.add_geometry_column("geometry", "GEOMETRY")
             timeline_items_table.create_spatial_index("geometry")
 
@@ -207,7 +211,7 @@ def build_database(db: Database):
             ),
         )
 
-        if IS_SPATIALITE_AVAILABLE:
+        if use_spatialite:
             samples_table.add_geometry_column("geometry", "GEOMETRY")
             samples_table.create_spatial_index("geometry")
 
@@ -313,16 +317,17 @@ def save_places(
     places: t.List[t.Dict[str, t.Any]],
     arc_export_file_id: int,
     places_table: Table,
+    use_spatialite: bool = False
 ):
     """
     Save the places data to the SQLite database.
     """
     conversions = {}
-    if IS_SPATIALITE_AVAILABLE:
+    if use_spatialite:
         conversions["geometry"] = "GeomFromText(?, 4326)"
 
     for place in places:
-        transform_place(place, is_spatialite_available=IS_SPATIALITE_AVAILABLE)
+        transform_place(place, use_spatialite=use_spatialite)
         place_id = place.pop("place_id")
 
         update_or_insert(
@@ -338,18 +343,19 @@ def save_timeline_items(
     timeline_items: t.List[t.Dict[str, t.Any]],
     arc_export_file_id: int,
     timeline_items_table: Table,
+    use_spatialite: bool = False
 ):
     """
     Save the timeline items data to the SQLite database.
     """
     for item in timeline_items:
         transform_timeline_item(
-            item, is_spatialite_available=IS_SPATIALITE_AVAILABLE
+            item, use_spatialite=use_spatialite
         )
         item["arc_export_file_id"] = arc_export_file_id
 
     conversions = {}
-    if IS_SPATIALITE_AVAILABLE:
+    if use_spatialite:
         conversions["geometry"] = "GeomFromText(?, 4326)"
 
     timeline_items_table.upsert_all(
@@ -361,18 +367,19 @@ def save_samples(
     samples: t.List[t.Dict[str, t.Any]],
     arc_export_file_id: int,
     samples_table: Table,
+    use_spatialite: bool = False
 ):
     """
     Save the samples data to the SQLite database.
     """
     for sample in samples:
         transform_sample(
-            sample, is_spatialite_available=IS_SPATIALITE_AVAILABLE
+            sample, use_spatialite=use_spatialite
         )
         sample["arc_export_file_id"] = arc_export_file_id
 
     conversions = {}
-    if IS_SPATIALITE_AVAILABLE:
+    if use_spatialite:
         conversions["geometry"] = "GeomFromText(?, 4326)"
 
     samples_table.upsert_all(samples, pk="sample_id", conversions=conversions)
