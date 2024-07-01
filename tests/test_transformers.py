@@ -12,9 +12,7 @@ from . import fixtures
 
 @pytest.mark.parametrize(
     "latitude, longitude, expected_result",
-    (
-        ("37.7749", "-122.4194", "POINT ( 37.7749 -122.4194 )"),
-    ),
+    (("37.7749", "-122.4194", "POINT ( 37.7749 -122.4194 )"),),
 )
 def test_convert_coordinates_to_wkt(latitude, longitude, expected_result):
     result = transformers.convert_coordinates_to_wkt(
@@ -55,7 +53,10 @@ def test_transform_place(place, expected_result):
 def test_transform_place__is_spatialite_available():
     place = deepcopy(fixtures.PLACE_ONE)
     result = transformers.transform_place(place, is_spatialite_available=True)
-    assert result["geometry"] == f"POINT ( {place['latitude']} {place['longitude']} )"
+    assert (
+        result["geometry"]
+        == f"POINT ( {place['latitude']} {place['longitude']} )"
+    )
 
 
 @pytest.mark.parametrize(
@@ -75,7 +76,10 @@ def test_transform_sample(sample, expected_result):
 def test_transform_sample__is_spatialite_available():
     sample = deepcopy(fixtures.SAMPLE_ONE)
     result = transformers.transform_sample(sample, is_spatialite_available=True)
-    assert result["geometry"] == f"POINT ( {sample['latitude']} {sample['longitude']} )"
+    assert (
+        result["geometry"]
+        == f"POINT ( {sample['latitude']} {sample['longitude']} )"
+    )
 
 
 @pytest.mark.parametrize(
@@ -98,8 +102,13 @@ def test_transform_timeline_item(timeline_item, expected_result):
 
 def test_transform_timeline_item__is_spatialite_available():
     item = deepcopy(fixtures.TIMELINE_ITEM_ONE)
-    result = transformers.transform_timeline_item(item, is_spatialite_available=True)
-    assert result["geometry"] == f"POINT ( {item['latitude']} {item['longitude']} )"
+    result = transformers.transform_timeline_item(
+        item, is_spatialite_available=True
+    )
+    assert (
+        result["geometry"]
+        == f"POINT ( {item['latitude']} {item['longitude']} )"
+    )
 
 
 @freeze_time("2024-01-01")

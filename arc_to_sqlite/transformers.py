@@ -1,7 +1,7 @@
 import datetime
 import re
 from pathlib import Path
-from typing import Any, Dict, Union
+from typing import Any, Dict
 
 
 def convert_coordinates_to_wkt(*, latitude: str, longitude: str) -> str:
@@ -22,7 +22,9 @@ def convert_to_snake_case(name: str) -> str:
     return re.sub("([a-z0-9])([A-Z])", r"\1_\2", s1).lower()
 
 
-def transform_place(place: Dict[str, Any], is_spatialite_available: bool = False):
+def transform_place(
+    place: Dict[str, Any], is_spatialite_available: bool = False
+):
     """
     Transform the place data from the Arc JSON to the SQLite schema.
     """
@@ -80,12 +82,16 @@ def transform_place(place: Dict[str, Any], is_spatialite_available: bool = False
         place.pop(key)
 
     if is_spatialite_available and "latitude" in place and "longitude" in place:
-        place["geometry"] = convert_coordinates_to_wkt(latitude=place['latitude'], longitude=place['longitude'])
+        place["geometry"] = convert_coordinates_to_wkt(
+            latitude=place["latitude"], longitude=place["longitude"]
+        )
 
     return place
 
 
-def transform_sample(sample: Dict[str, Any], is_spatialite_available: bool = False):
+def transform_sample(
+    sample: Dict[str, Any], is_spatialite_available: bool = False
+):
     """
     Transform the sample data from the Arc JSON to the SQLite schema.
     """
@@ -154,13 +160,21 @@ def transform_sample(sample: Dict[str, Any], is_spatialite_available: bool = Fal
 
         sample.pop(key)
 
-    if is_spatialite_available and "latitude" in sample and "longitude" in sample:
-        sample["geometry"] = convert_coordinates_to_wkt(latitude=sample['latitude'], longitude=sample['longitude'])
+    if (
+        is_spatialite_available
+        and "latitude" in sample
+        and "longitude" in sample
+    ):
+        sample["geometry"] = convert_coordinates_to_wkt(
+            latitude=sample["latitude"], longitude=sample["longitude"]
+        )
 
     return sample
 
 
-def transform_timeline_item(timeline_item: Dict[str, Any], is_spatialite_available: bool = False):
+def transform_timeline_item(
+    timeline_item: Dict[str, Any], is_spatialite_available: bool = False
+):
     """
     Transform the timeline item data from the Arc JSON to the SQLite schema.
     """
@@ -244,8 +258,15 @@ def transform_timeline_item(timeline_item: Dict[str, Any], is_spatialite_availab
     for key in to_remove:
         timeline_item.pop(key)
 
-    if is_spatialite_available and "latitude" in timeline_item and "longitude" in timeline_item:
-        timeline_item["geometry"] = convert_coordinates_to_wkt(latitude=timeline_item['latitude'], longitude=timeline_item['longitude'])
+    if (
+        is_spatialite_available
+        and "latitude" in timeline_item
+        and "longitude" in timeline_item
+    ):
+        timeline_item["geometry"] = convert_coordinates_to_wkt(
+            latitude=timeline_item["latitude"],
+            longitude=timeline_item["longitude"],
+        )
 
     return timeline_item
 
