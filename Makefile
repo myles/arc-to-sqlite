@@ -44,7 +44,8 @@ arc.db:
 .PHONY: datasette
 datasette:
 	poetry run datasette serve arc.db \
-		--metadata metadata.yml
+		--metadata metadata.yml \
+		--load-extension=spatialite
 
 .PHONY: ci
 ci: setup test lint mypy
