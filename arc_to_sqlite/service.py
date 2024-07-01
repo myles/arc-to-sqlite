@@ -317,7 +317,7 @@ def save_places(
     places: t.List[t.Dict[str, t.Any]],
     arc_export_file_id: int,
     places_table: Table,
-    use_spatialite: bool = False
+    use_spatialite: bool = False,
 ):
     """
     Save the places data to the SQLite database.
@@ -343,15 +343,13 @@ def save_timeline_items(
     timeline_items: t.List[t.Dict[str, t.Any]],
     arc_export_file_id: int,
     timeline_items_table: Table,
-    use_spatialite: bool = False
+    use_spatialite: bool = False,
 ):
     """
     Save the timeline items data to the SQLite database.
     """
     for item in timeline_items:
-        transform_timeline_item(
-            item, use_spatialite=use_spatialite
-        )
+        transform_timeline_item(item, use_spatialite=use_spatialite)
         item["arc_export_file_id"] = arc_export_file_id
 
     conversions = {}
@@ -367,15 +365,13 @@ def save_samples(
     samples: t.List[t.Dict[str, t.Any]],
     arc_export_file_id: int,
     samples_table: Table,
-    use_spatialite: bool = False
+    use_spatialite: bool = False,
 ):
     """
     Save the samples data to the SQLite database.
     """
     for sample in samples:
-        transform_sample(
-            sample, use_spatialite=use_spatialite
-        )
+        transform_sample(sample, use_spatialite=use_spatialite)
         sample["arc_export_file_id"] = arc_export_file_id
 
     conversions = {}
