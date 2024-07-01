@@ -416,7 +416,9 @@ def extract_places_and_samples_from_timeline_items(
     return timeline_items, places, samples
 
 
-def process_arc_export_file(db: Database, file_path: Path, use_spatialite: bool = False):
+def process_arc_export_file(
+    db: Database, file_path: Path, use_spatialite: bool = False
+):
     """
     Process an Arc export file and save the data to the SQLite database.
     """
