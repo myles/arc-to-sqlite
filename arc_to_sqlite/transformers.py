@@ -22,9 +22,7 @@ def convert_to_snake_case(name: str) -> str:
     return re.sub("([a-z0-9])([A-Z])", r"\1_\2", s1).lower()
 
 
-def transform_place(
-    place: Dict[str, Any], use_spatialite: bool = False
-):
+def transform_place(place: Dict[str, Any], use_spatialite: bool = False):
     """
     Transform the place data from the Arc JSON to the SQLite schema.
     """
@@ -89,9 +87,7 @@ def transform_place(
     return place
 
 
-def transform_sample(
-    sample: Dict[str, Any], use_spatialite: bool = False
-):
+def transform_sample(sample: Dict[str, Any], use_spatialite: bool = False):
     """
     Transform the sample data from the Arc JSON to the SQLite schema.
     """
@@ -160,11 +156,7 @@ def transform_sample(
 
         sample.pop(key)
 
-    if (
-        use_spatialite
-        and "latitude" in sample
-        and "longitude" in sample
-    ):
+    if use_spatialite and "latitude" in sample and "longitude" in sample:
         sample["geometry"] = convert_coordinates_to_wkt(
             latitude=sample["latitude"], longitude=sample["longitude"]
         )

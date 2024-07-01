@@ -65,4 +65,6 @@ def cli(
         label=f"Processing {export_type} export files",
     ) as bar:
         for arc_export_file_path in bar:
-            service.process_arc_export_file(db=db, file_path=arc_export_file_path, use_spatialite=spatialite)
+            service.process_arc_export_file(
+                db=db, file_path=arc_export_file_path, use_spatialite=spatialite
+            )

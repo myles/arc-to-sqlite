@@ -102,9 +102,7 @@ def test_transform_timeline_item(timeline_item, expected_result):
 
 def test_transform_timeline_item__use_spatialite():
     item = deepcopy(fixtures.TIMELINE_ITEM_ONE)
-    result = transformers.transform_timeline_item(
-        item, use_spatialite=True
-    )
+    result = transformers.transform_timeline_item(item, use_spatialite=True)
     assert (
         result["geometry"]
         == f"POINT ( {item['latitude']} {item['longitude']} )"
