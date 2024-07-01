@@ -7,6 +7,7 @@ import typing as t
 from pathlib import Path
 
 from sqlite_utils.db import Database, Table
+from sqlite_utils.utils import find_spatialite
 
 from .transformers import (
     transform_arc_export_file_path,
@@ -18,11 +19,20 @@ from .transformers import (
 logger = logging.getLogger(__name__)
 
 
+IS_SPATIALITE_AVAILABLE = find_spatialite() is not None
+
+
 def open_database(db_file_path: Path) -> Database:
     """
     Open the Mastodon SQLite database.
     """
-    return Database(db_file_path)
+    db = Database(db_file_path)
+
+    if IS_SPATIALITE_AVAILABLE:
+        db.init_spatialite(find_spatialite())
+        logger.info("Spatialite extension loaded.")
+
+    return db
 
 
 def get_table(table_name: str, db: Database) -> Table:
@@ -68,65 +78,74 @@ def build_database(db: Database):
         logger.info(f"Created the {arc_export_files_table.name} table.")
 
     if places_table.exists() is False:
+        columns = {
+            "place_id": str,
+            "name": str,
+            "street_address": str,
+            "latitude": float,
+            "longitude": float,
+            "radius_sd": float,
+            "radius_mean": float,
+            "mapbox_place_id": str,
+            "mapbox_category": str,
+            "google_place_id": str,
+            "google_primary_type": str,
+            "seconds_from_gmt": int,
+            "last_saved_at": datetime.datetime,
+            "arc_export_file_id": int,
+        }
+
         places_table.create(
-            columns={
-                "place_id": str,
-                "name": str,
-                "street_address": str,
-                "latitude": float,
-                "longitude": float,
-                "radius_sd": float,
-                "radius_mean": float,
-                "mapbox_place_id": str,
-                "mapbox_category": str,
-                "google_place_id": str,
-                "google_primary_type": str,
-                "seconds_from_gmt": int,
-                "last_saved_at": datetime.datetime,
-                "arc_export_file_id": int,
-            },
+            columns=columns,
             pk="place_id",
             foreign_keys=(("arc_export_file_id", "arc_export_files", "id"),),
         )
         places_table.enable_fts(
             ["name", "street_address"], create_triggers=True
         )
+
+        if IS_SPATIALITE_AVAILABLE:
+            places_table.add_geometry_column("geometry", "GEOMETRY")
+            places_table.create_spatial_index("geometry")
+
         logger.info(f"Created the {places_table.name} table.")
 
     create_table_indexes(places_table, ["latitude", "longitude"])
 
     if timeline_items_table.exists() is False:
+        columns = {
+            "item_id": str,
+            "next_item_id": str,
+            "previous_item_id": str,
+            "place_id": str,
+            "starts_at": datetime.datetime,
+            "ends_at": datetime.datetime,
+            "latitude": float,
+            "longitude": float,
+            "altitude": float,
+            "radius_sd": float,
+            "radius_mean": float,
+            "step_count": int,
+            "hk_step_count": int,
+            "floors_ascended": int,
+            "floors_descended": int,
+            "street_address": str,
+            "manual_place": bool,
+            "is_visit": bool,
+            "average_heart_rate": float,
+            "max_heart_rate": int,
+            "active_energy_burned": float,
+            "activity_type": str,
+            "activity_type_confidence_score": float,
+            "manual_activity_type": bool,
+            "uncertain_activity_type": bool,
+            "unknown_activity_type": bool,
+            "last_saved_at": datetime.datetime,
+            "arc_export_file_id": int,
+        }
+
         timeline_items_table.create(
-            columns={
-                "item_id": str,
-                "next_item_id": str,
-                "previous_item_id": str,
-                "place_id": str,
-                "starts_at": datetime.datetime,
-                "ends_at": datetime.datetime,
-                "latitude": float,
-                "longitude": float,
-                "altitude": float,
-                "radius_sd": float,
-                "radius_mean": float,
-                "step_count": int,
-                "hk_step_count": int,
-                "floors_ascended": int,
-                "floors_descended": int,
-                "street_address": str,
-                "manual_place": bool,
-                "is_visit": bool,
-                "average_heart_rate": float,
-                "max_heart_rate": int,
-                "active_energy_burned": float,
-                "activity_type": str,
-                "activity_type_confidence_score": float,
-                "manual_activity_type": bool,
-                "uncertain_activity_type": bool,
-                "unknown_activity_type": bool,
-                "last_saved_at": datetime.datetime,
-                "arc_export_file_id": int,
-            },
+            columns=columns,
             pk="item_id",
             foreign_keys=(
                 ("next_item_id", "timeline_items", "item_id"),
@@ -138,6 +157,11 @@ def build_database(db: Database):
         timeline_items_table.enable_fts(
             ["street_address"], create_triggers=True
         )
+
+        if IS_SPATIALITE_AVAILABLE:
+            timeline_items_table.add_geometry_column("geometry", "GEOMETRY")
+            timeline_items_table.create_spatial_index("geometry")
+
         logger.info(f"Created the {timeline_items_table.name} table.")
 
     create_table_indexes(
@@ -182,6 +206,11 @@ def build_database(db: Database):
                 ("arc_export_file_id", "arc_export_files", "id"),
             ),
         )
+
+        if IS_SPATIALITE_AVAILABLE:
+            samples_table.add_geometry_column("geometry", "GEOMETRY")
+            samples_table.create_spatial_index("geometry")
+
         logger.info(f"Created the {samples_table.name} table.")
 
     create_table_indexes(
@@ -193,6 +222,7 @@ def build_database(db: Database):
 def update_or_insert(
     table: Table,
     *,
+    conversions: t.Optional[t.Dict[str, str]] = None,
     defaults: t.Optional[t.Dict[str, t.Any]] = None,
     create_defaults: t.Optional[t.Dict[str, t.Any]] = None,
     **kwargs,
@@ -217,9 +247,9 @@ def update_or_insert(
         ...
 
     if row_pk is not None:
-        return table.update(pk_values=row_pk, updates={**defaults, **kwargs})
+        return table.update(pk_values=row_pk, updates={**defaults, **kwargs}, conversions=conversions)
 
-    return table.insert(record={**kwargs, **defaults, **create_defaults})
+    return table.insert(record={**kwargs, **defaults, **create_defaults}, conversions=conversions)
 
 
 def calculate_file_obj_checksum(file_obj: t.BinaryIO) -> str:
@@ -280,12 +310,17 @@ def save_places(
     """
     Save the places data to the SQLite database.
     """
+    conversions = {}
+    if IS_SPATIALITE_AVAILABLE:
+        conversions["geometry"] = "GeomFromText(?, 4326)"
+
     for place in places:
-        transform_place(place)
+        transform_place(place, is_spatialite_available=IS_SPATIALITE_AVAILABLE)
         place_id = place.pop("place_id")
 
         update_or_insert(
             table=places_table,
+            conversions=conversions,
             defaults=place,
             create_defaults={"arc_export_file_id": arc_export_file_id},
             place_id=place_id,
@@ -301,10 +336,14 @@ def save_timeline_items(
     Save the timeline items data to the SQLite database.
     """
     for item in timeline_items:
-        transform_timeline_item(item)
+        transform_timeline_item(item, is_spatialite_available=IS_SPATIALITE_AVAILABLE)
         item["arc_export_file_id"] = arc_export_file_id
 
-    timeline_items_table.upsert_all(timeline_items, pk="item_id")
+    conversions = {}
+    if IS_SPATIALITE_AVAILABLE:
+        conversions["geometry"] = "GeomFromText(?, 4326)"
+
+    timeline_items_table.upsert_all(timeline_items, pk="item_id", conversions=conversions)
 
 
 def save_samples(
@@ -316,10 +355,14 @@ def save_samples(
     Save the samples data to the SQLite database.
     """
     for sample in samples:
-        transform_sample(sample)
+        transform_sample(sample, is_spatialite_available=IS_SPATIALITE_AVAILABLE)
         sample["arc_export_file_id"] = arc_export_file_id
 
-    samples_table.upsert_all(samples, pk="sample_id")
+    conversions = {}
+    if IS_SPATIALITE_AVAILABLE:
+        conversions["geometry"] = "GeomFromText(?, 4326)"
+
+    samples_table.upsert_all(samples, pk="sample_id", conversions=conversions)
 
 
 def list_arc_export_files(
