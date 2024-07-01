@@ -23,7 +23,7 @@ def convert_to_snake_case(name: str) -> str:
 
 
 def transform_place(
-    place: Dict[str, Any], is_spatialite_available: bool = False
+    place: Dict[str, Any], use_spatialite: bool = False
 ):
     """
     Transform the place data from the Arc JSON to the SQLite schema.
@@ -81,7 +81,7 @@ def transform_place(
     for key in to_remove:
         place.pop(key)
 
-    if is_spatialite_available and "latitude" in place and "longitude" in place:
+    if use_spatialite and "latitude" in place and "longitude" in place:
         place["geometry"] = convert_coordinates_to_wkt(
             latitude=place["latitude"], longitude=place["longitude"]
         )
@@ -90,7 +90,7 @@ def transform_place(
 
 
 def transform_sample(
-    sample: Dict[str, Any], is_spatialite_available: bool = False
+    sample: Dict[str, Any], use_spatialite: bool = False
 ):
     """
     Transform the sample data from the Arc JSON to the SQLite schema.
@@ -161,7 +161,7 @@ def transform_sample(
         sample.pop(key)
 
     if (
-        is_spatialite_available
+        use_spatialite
         and "latitude" in sample
         and "longitude" in sample
     ):
@@ -173,7 +173,7 @@ def transform_sample(
 
 
 def transform_timeline_item(
-    timeline_item: Dict[str, Any], is_spatialite_available: bool = False
+    timeline_item: Dict[str, Any], use_spatialite: bool = False
 ):
     """
     Transform the timeline item data from the Arc JSON to the SQLite schema.
@@ -259,7 +259,7 @@ def transform_timeline_item(
         timeline_item.pop(key)
 
     if (
-        is_spatialite_available
+        use_spatialite
         and "latitude" in timeline_item
         and "longitude" in timeline_item
     ):

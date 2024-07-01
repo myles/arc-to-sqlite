@@ -50,9 +50,9 @@ def test_transform_place(place, expected_result):
     assert result == expected_result
 
 
-def test_transform_place__is_spatialite_available():
+def test_transform_place__use_spatialite():
     place = deepcopy(fixtures.PLACE_ONE)
-    result = transformers.transform_place(place, is_spatialite_available=True)
+    result = transformers.transform_place(place, use_spatialite=True)
     assert (
         result["geometry"]
         == f"POINT ( {place['latitude']} {place['longitude']} )"
@@ -73,9 +73,9 @@ def test_transform_sample(sample, expected_result):
     assert result == expected_result
 
 
-def test_transform_sample__is_spatialite_available():
+def test_transform_sample__use_spatialite():
     sample = deepcopy(fixtures.SAMPLE_ONE)
-    result = transformers.transform_sample(sample, is_spatialite_available=True)
+    result = transformers.transform_sample(sample, use_spatialite=True)
     assert (
         result["geometry"]
         == f"POINT ( {sample['latitude']} {sample['longitude']} )"
@@ -100,10 +100,10 @@ def test_transform_timeline_item(timeline_item, expected_result):
     assert result == expected_result
 
 
-def test_transform_timeline_item__is_spatialite_available():
+def test_transform_timeline_item__use_spatialite():
     item = deepcopy(fixtures.TIMELINE_ITEM_ONE)
     result = transformers.transform_timeline_item(
-        item, is_spatialite_available=True
+        item, use_spatialite=True
     )
     assert (
         result["geometry"]
