@@ -4,8 +4,8 @@ import hashlib
 import json
 import logging
 import typing as t
-from pathlib import Path
 from copy import deepcopy
+from pathlib import Path
 
 from sqlite_utils.db import Database, Table
 from sqlite_utils.utils import find_spatialite
@@ -291,7 +291,9 @@ def get_arc_export_file_path(
         arc_json_export_path = arc_json_export_path / "Daily"
 
     if arc_json_export_path.exists() is False:
-        raise errors.ArcExportPathNotFoundError(f"Directory {arc_json_export_path} does not exist.")
+        raise errors.ArcExportPathNotFoundError(
+            f"Directory {arc_json_export_path} does not exist."
+        )
 
     return arc_json_export_path
 

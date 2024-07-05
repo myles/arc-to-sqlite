@@ -1,4 +1,3 @@
-from pathlib import Path
 
 
 class ArcToSqliteError(Exception):
