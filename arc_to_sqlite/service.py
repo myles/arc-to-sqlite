@@ -6,6 +6,7 @@ import logging
 import typing as t
 from copy import deepcopy
 from pathlib import Path
+from copy import deepcopy
 
 from sqlite_utils.db import Database, Table
 from sqlite_utils.utils import find_spatialite
@@ -274,28 +275,6 @@ def update_or_insert(
         record={**kwargs, **defaults, **create_defaults},
         conversions=conversions,
     )
-
-
-def get_arc_export_file_path(
-    arc_root_dir: Path,
-    export_type: t.Literal["daily", "monthly"] = "daily",
-) -> Path:
-    """
-    Get the Arc export file path for the given export type.
-    """
-    arc_json_export_path = arc_root_dir / "Documents/Export/JSON"
-
-    if export_type == "monthly":
-        arc_json_export_path = arc_json_export_path / "Monthly"
-    else:
-        arc_json_export_path = arc_json_export_path / "Daily"
-
-    if arc_json_export_path.exists() is False:
-        raise errors.ArcExportPathNotFoundError(
-            f"Directory {arc_json_export_path} does not exist."
-        )
-
-    return arc_json_export_path
 
 
 def calculate_file_obj_checksum(file_obj: t.BinaryIO) -> str:

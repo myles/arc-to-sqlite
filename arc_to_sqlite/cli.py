@@ -3,6 +3,7 @@ from typing import Literal
 
 import click
 
+from .errors import ArcToSqliteError
 from . import service
 from .errors import ArcToSqliteError
 
@@ -69,9 +70,7 @@ def cli(
         for arc_export_file_path in bar:
             try:
                 service.process_arc_export_file(
-                    db=db,
-                    file_path=arc_export_file_path,
-                    use_spatialite=spatialite,
+                    db=db, file_path=arc_export_file_path, use_spatialite=spatialite
                 )
             except ArcToSqliteError as error:
                 raise click.ClickException(error.message)
