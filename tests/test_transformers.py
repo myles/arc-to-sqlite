@@ -11,6 +11,42 @@ from . import fixtures
 
 
 @pytest.mark.parametrize(
+    "latitude, longitude, expected_result",
+    (("37.7749", "-122.4194", "POINT (37.7749 -122.4194)"),),
+)
+def test_convert_coordinates_to_wkt_point(latitude, longitude, expected_result):
+    result = transformers.convert_coordinates_to_wkt_point(
+        latitude=latitude,
+        longitude=longitude,
+    )
+    assert result == expected_result
+
+
+@pytest.mark.parametrize(
+    "samples, expected_result",
+    (
+        (
+            [
+                {"location": {"latitude": "37.7749", "longitude": "-122.4194"}},
+                {},
+                {"location": {}},
+                {"location": {"latitude": "37.7730", "longitude": "-122.4190"}},
+            ],
+            "LINESTRING (37.7749 -122.4194, 37.773 -122.419)",
+        ),
+        (
+            [{"location": {"latitude": "37.7749", "longitude": "-122.4194"}}],
+            None,
+        ),
+        ([], None),
+    ),
+)
+def test_convert_samples_to_wkt_line_string(samples, expected_result):
+    result = transformers.convert_samples_to_wkt_line_string(samples)
+    assert result == expected_result
+
+
+@pytest.mark.parametrize(
     "name, expected_result",
     (
         ("streetAddress", "street_address"),
@@ -38,6 +74,15 @@ def test_transform_place(place, expected_result):
     assert result == expected_result
 
 
+def test_transform_place__use_spatialite():
+    place = deepcopy(fixtures.PLACE_ONE)
+    result = transformers.transform_place(place, use_spatialite=True)
+    assert (
+        result["coordinates"]
+        == f"POINT ({place['latitude']} {place['longitude']})"
+    )
+
+
 @pytest.mark.parametrize(
     "sample, expected_result",
     (
@@ -50,6 +95,15 @@ def test_transform_sample(sample, expected_result):
     sample = deepcopy(sample)
     result = transformers.transform_sample(sample)
     assert result == expected_result
+
+
+def test_transform_sample__use_spatialite():
+    sample = deepcopy(fixtures.SAMPLE_ONE)
+    result = transformers.transform_sample(sample, use_spatialite=True)
+    assert (
+        result["coordinates"]
+        == f"POINT ({sample['latitude']} {sample['longitude']})"
+    )
 
 
 @pytest.mark.parametrize(
@@ -68,6 +122,15 @@ def test_transform_timeline_item(timeline_item, expected_result):
     timeline_item = deepcopy(timeline_item)
     result = transformers.transform_timeline_item(timeline_item)
     assert result == expected_result
+
+
+def test_transform_timeline_item__use_spatialite():
+    item = deepcopy(fixtures.TIMELINE_ITEM_ONE)
+    result = transformers.transform_timeline_item(item, use_spatialite=True)
+    assert (
+        result["coordinates"]
+        == f"POINT ({item['latitude']} {item['longitude']})"
+    )
 
 
 @freeze_time("2024-01-01")
