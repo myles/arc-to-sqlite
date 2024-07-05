@@ -1,14 +1,40 @@
 import datetime
 import re
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, List, Optional
+from shapely import Point, LineString
 
 
-def convert_coordinates_to_wkt(*, latitude: str, longitude: str) -> str:
+def convert_coordinates_to_wkt_point(*, latitude: str, longitude: str) -> str:
     """
     Convert a latitude and longitude to a Well-Known Text (WKT) string.
     """
-    return f"POINT ( {latitude} {longitude} )"
+    return Point(float(latitude), float(longitude)).wkt
+
+
+def convert_samples_to_wkt_line_string(samples: List[Dict[str, Any]]) -> Optional[str]:
+    """
+    Convert the latitude and longitude of a sample to a Well-Known Text (WKT)
+    string.
+    """
+    # Filter out any samples that do not have a location or latitude and
+    # longitude.
+    samples = [
+        sample
+        for sample in samples
+        if sample.get("location") and sample["location"].get("latitude") and sample["location"].get("longitude")
+    ]
+
+    # If there is less than one sample, return None, as a LineString requires
+    # at least two points.
+    if len(samples) <= 1:
+        return None
+
+    points = [
+        Point(float(sample["location"]["latitude"]), float(sample["location"]["longitude"]))
+        for sample in samples
+    ]
+    return LineString(points).wkt
 
 
 def convert_to_snake_case(name: str) -> str:
@@ -80,7 +106,7 @@ def transform_place(place: Dict[str, Any], use_spatialite: bool = False):
         place.pop(key)
 
     if use_spatialite and "latitude" in place and "longitude" in place:
-        place["geometry"] = convert_coordinates_to_wkt(
+        place["coordinates"] = convert_coordinates_to_wkt_point(
             latitude=place["latitude"], longitude=place["longitude"]
         )
 
@@ -157,7 +183,7 @@ def transform_sample(sample: Dict[str, Any], use_spatialite: bool = False):
         sample.pop(key)
 
     if use_spatialite and "latitude" in sample and "longitude" in sample:
-        sample["geometry"] = convert_coordinates_to_wkt(
+        sample["coordinates"] = convert_coordinates_to_wkt_point(
             latitude=sample["latitude"], longitude=sample["longitude"]
         )
 
@@ -181,6 +207,8 @@ def transform_timeline_item(
     radius = timeline_item.pop("radius", None) or {}
     for key, value in radius.items():
         timeline_item[f"radius_{convert_to_snake_case(key)}"] = value
+
+    samples = timeline_item.pop("samples", [])
 
     # Convert the keys to snake_case
     to_convert = [
@@ -250,15 +278,15 @@ def transform_timeline_item(
     for key in to_remove:
         timeline_item.pop(key)
 
-    if (
-        use_spatialite
-        and "latitude" in timeline_item
-        and "longitude" in timeline_item
-    ):
-        timeline_item["geometry"] = convert_coordinates_to_wkt(
-            latitude=timeline_item["latitude"],
-            longitude=timeline_item["longitude"],
-        )
+    if use_spatialite:
+        if "latitude" in timeline_item and "longitude" in timeline_item:
+            timeline_item["coordinates"] = convert_coordinates_to_wkt_point(
+                latitude=timeline_item["latitude"],
+                longitude=timeline_item["longitude"],
+            )
+
+        if samples:
+            timeline_item["samples_path"] = convert_samples_to_wkt_line_string(samples)
 
     return timeline_item
 
