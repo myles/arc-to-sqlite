@@ -3,6 +3,7 @@ from typing import Literal
 
 import click
 
+from .errors import ArcToSqliteError
 from . import service
 
 
@@ -46,13 +47,14 @@ def cli(
     db = service.open_database(Path(db_path), use_spatialite=spatialite)
     service.build_database(db, use_spatialite=spatialite)
 
-    # Get the Arc export path for the given export type.
-    arc_json_export_path = Path(arc_root_dir) / "Documents/Export/JSON"
-
-    if export_type == "monthly":
-        arc_export_path = arc_json_export_path / "Monthly"
-    else:
-        arc_export_path = arc_json_export_path / "Daily"
+    # Get the path to the Arc export directory.
+    try:
+        arc_export_path = service.get_arc_export_file_path(
+            Path(arc_root_dir),
+            export_type,
+        )
+    except ArcToSqliteError as error:
+        raise click.ClickException(error.message)
 
     # Get the list of export files and process them.
     # Transforming this from a generator to a list, so we can sort it and show
@@ -65,6 +67,9 @@ def cli(
         label=f"Processing {export_type} export files",
     ) as bar:
         for arc_export_file_path in bar:
-            service.process_arc_export_file(
-                db=db, file_path=arc_export_file_path, use_spatialite=spatialite
-            )
+            try:
+                service.process_arc_export_file(
+                    db=db, file_path=arc_export_file_path, use_spatialite=spatialite
+                )
+            except ArcToSqliteError as error:
+                raise click.ClickException(error.message)

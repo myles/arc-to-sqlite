@@ -10,6 +10,14 @@ setup: pyproject.toml
 test:
 	poetry run pytest --cov=arc_to_sqlite/ --cov-report=xml
 
+.PHONY: coverage.xml
+coverage.xml: test
+
+.PHONY: coverage
+coverage: coverage.xml
+	poetry run coverage html
+	open htmlcov/index.html
+
 .PHONY: lint
 lint:
 	poetry run black --check .
@@ -40,7 +48,8 @@ clean:
 .PHONY: arc.db
 arc.db:
 	poetry run arc-to-sqlite arc.db \
-		~/Library/Mobile\ Documents/iCloud\~com\~bigpaua\~LearnerCoacher/
+		~/Library/Mobile\ Documents/iCloud\~com\~bigpaua\~LearnerCoacher/ \
+		--spatialite
 
 .PHONY: datasette
 datasette:
