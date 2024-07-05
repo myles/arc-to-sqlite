@@ -39,7 +39,7 @@ def test_convert_coordinates_to_wkt_point(latitude, longitude, expected_result):
             None,
         ),
         ([], None),
-    )
+    ),
 )
 def test_convert_samples_to_wkt_line_string(samples, expected_result):
     result = transformers.convert_samples_to_wkt_line_string(samples)

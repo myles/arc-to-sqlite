@@ -2,7 +2,8 @@ import datetime
 import re
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-from shapely import Point, LineString
+
+from shapely import LineString, Point
 
 
 def convert_coordinates_to_wkt_point(*, latitude: str, longitude: str) -> str:
@@ -12,7 +13,9 @@ def convert_coordinates_to_wkt_point(*, latitude: str, longitude: str) -> str:
     return Point(float(latitude), float(longitude)).wkt
 
 
-def convert_samples_to_wkt_line_string(samples: List[Dict[str, Any]]) -> Optional[str]:
+def convert_samples_to_wkt_line_string(
+    samples: List[Dict[str, Any]]
+) -> Optional[str]:
     """
     Convert the latitude and longitude of a sample to a Well-Known Text (WKT)
     string.
@@ -22,7 +25,9 @@ def convert_samples_to_wkt_line_string(samples: List[Dict[str, Any]]) -> Optiona
     samples = [
         sample
         for sample in samples
-        if sample.get("location") and sample["location"].get("latitude") and sample["location"].get("longitude")
+        if sample.get("location")
+        and sample["location"].get("latitude")
+        and sample["location"].get("longitude")
     ]
 
     # If there is less than one sample, return None, as a LineString requires
@@ -31,7 +36,10 @@ def convert_samples_to_wkt_line_string(samples: List[Dict[str, Any]]) -> Optiona
         return None
 
     points = [
-        Point(float(sample["location"]["latitude"]), float(sample["location"]["longitude"]))
+        Point(
+            float(sample["location"]["latitude"]),
+            float(sample["location"]["longitude"]),
+        )
         for sample in samples
     ]
     return LineString(points).wkt
@@ -286,7 +294,9 @@ def transform_timeline_item(
             )
 
         if samples:
-            timeline_item["samples_path"] = convert_samples_to_wkt_line_string(samples)
+            timeline_item["samples_path"] = convert_samples_to_wkt_line_string(
+                samples
+            )
 
     return timeline_item
 
