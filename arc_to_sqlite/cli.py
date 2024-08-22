@@ -4,6 +4,7 @@ from typing import Literal
 import click
 
 from . import service
+from .errors import ArcToSqliteError
 
 
 @click.command()
@@ -24,25 +25,35 @@ from . import service
     type=click.Choice(["daily", "monthly"]),
     default="daily",
 )
+@click.option("--spatialite", is_flag=True, help="Enable SpatiaLite support.")
 def cli(
     db_path: str,
     arc_root_dir: str,
     export_type: Literal["daily", "monthly"] = "daily",
+    spatialite: bool = False,
 ):
     """
     Save data from Arc's export to a SQLite database.
     """
+    # If spatialite is enabled, we need to ensure the SpatiaLite extension is
+    # available.
+    if spatialite is True and service.check_spatialite_support() is False:
+        raise click.ClickException(
+            "SpatiaLite support is not available. Please ensure the SpatiaLite"
+            " extension is installed and available in the system PATH."
+        )
+
     # Open the SQLite database and build the database structure.
-    db = service.open_database(Path(db_path))
-    service.build_database(db)
+    db = service.open_database(Path(db_path), use_spatialite=spatialite)
+    service.build_database(db, use_spatialite=spatialite)
 
-    # Get the Arc export path for the given export type.
-    arc_json_export_path = Path(arc_root_dir) / "Documents/Export/JSON"
-
-    if export_type == "monthly":
-        arc_export_path = arc_json_export_path / "Monthly"
-    else:
-        arc_export_path = arc_json_export_path / "Daily"
+    # Get the path to the Arc export directory.
+    try:
+        arc_export_path = service.get_arc_export_path(
+            Path(arc_root_dir), export_type
+        )
+    except ArcToSqliteError as error:
+        raise click.ClickException(error.message)
 
     # Get the list of export files and process them.
     # Transforming this from a generator to a list, so we can sort it and show
@@ -55,4 +66,11 @@ def cli(
         label=f"Processing {export_type} export files",
     ) as bar:
         for arc_export_file_path in bar:
-            service.process_arc_export_file(db, arc_export_file_path)
+            try:
+                service.process_arc_export_file(
+                    db=db,
+                    file_path=arc_export_file_path,
+                    use_spatialite=spatialite,
+                )
+            except ArcToSqliteError as error:
+                raise click.ClickException(error.message)
