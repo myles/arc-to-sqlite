@@ -6,7 +6,6 @@ import logging
 import typing as t
 from copy import deepcopy
 from pathlib import Path
-from copy import deepcopy
 
 from sqlite_utils.db import Database, Table
 from sqlite_utils.utils import find_spatialite

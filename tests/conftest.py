@@ -1,7 +1,6 @@
 import pytest
 from click.testing import CliRunner
 from sqlite_utils.db import Database
-from click.testing import CliRunner
 
 
 @pytest.fixture
