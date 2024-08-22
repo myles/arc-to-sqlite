@@ -234,7 +234,9 @@ def build_database(db: Database, use_spatialite: bool = False):
     )
 
 
-def get_arc_export_path(path: Path, export_type: t.Literal["daily", "monthly"]) -> Path:
+def get_arc_export_path(
+    path: Path, export_type: t.Literal["daily", "monthly"]
+) -> Path:
     """
     Get the path to the Arc Export directory.
     """
