@@ -1,9 +1,9 @@
 # arc-to-sqlite
 
-Save data from [Arc App][arc_app]'s daily (or monthly) export to a SQLite 
-database.
+Save data from [Arc Timeline][arc_timeline]'s daily (or monthly) export to a
+SQLite database.
 
-[arc_app]: https://www.bigpaua.com/arcapp/
+[arc_timeline]: https://www.bigpaua.com/arcapp/
 
 # Installation
 
@@ -20,3 +20,4 @@ iCloud Drive, `~/Library/Mobile Documents/iCloud~com~bigpaua~LearnerCoacher/`.
 ```bash
 foo@bar:~$ arc-to-sqlite arc.db ~/Library/Mobile\ Documents/iCloud\~com\~bigpaua\~LearnerCoacher/
 ```
+
