@@ -49,9 +49,8 @@ def cli(
 
     # Get the path to the Arc export directory.
     try:
-        arc_export_path = service.get_arc_export_file_path(
-            Path(arc_root_dir),
-            export_type,
+        arc_export_path = service.get_arc_export_path(
+            Path(arc_root_dir), export_type
         )
     except ArcToSqliteError as error:
         raise click.ClickException(error.message)

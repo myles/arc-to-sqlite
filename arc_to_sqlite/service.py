@@ -234,6 +234,20 @@ def build_database(db: Database, use_spatialite: bool = False):
     )
 
 
+def get_arc_export_path(path: Path, export_type: t.Literal["daily", "monthly"]) -> Path:
+    """
+    Get the path to the Arc Export directory.
+    """
+    path = (path / "Documents/Export/JSON" / export_type.title()).resolve()
+
+    if path.exists() is False:
+        raise errors.ArcExportPathNotFoundError(
+            f"The Arc export path {path} does not exist."
+        )
+
+    return path
+
+
 def update_or_insert(
     table: Table,
     *,
