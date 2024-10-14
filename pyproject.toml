@@ -26,7 +26,7 @@ ruff = "^0.6.1"
 types-shapely = "^2.0.0.20240618"
 
 [tool.poetry.group.datasette.dependencies]
-datasette = "^0.64.8"
+datasette = "^0.65"
 datasette-cluster-map = "^0.18.2"
 datasette-dashboards = "^0.6.2"
 datasette-ics = "^0.5.2"

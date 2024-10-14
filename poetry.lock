@@ -43,17 +43,6 @@ test = ["anyio[trio]", "coverage[toml] (>=7)", "exceptiongroup (>=1.2.0)", "hypo
 trio = ["trio (>=0.23)"]
 
 [[package]]
-name = "appdirs"
-version = "1.4.4"
-description = "A small Python module for determining appropriate platform-specific dirs, e.g. a \"user data dir\"."
-optional = false
-python-versions = "*"
-files = [
-    {file = "appdirs-1.4.4-py2.py3-none-any.whl", hash = "sha256:a841dacd6b99318a741b166adb07e19ee71a274450e68237b4650ca1055ab128"},
-    {file = "appdirs-1.4.4.tar.gz", hash = "sha256:7d5d0167b2b1ba821647616af46a749d1c653740dd0d2415100fe26e27afdf41"},
-]
-
-[[package]]
 name = "arrow"
 version = "1.3.0"
 description = "Better dates & times for Python"
@@ -524,13 +513,13 @@ files = [
 
 [[package]]
 name = "datasette"
-version = "0.64.8"
+version = "0.65"
 description = "An open source multi-tool for exploring and publishing data"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "datasette-0.64.8-py3-none-any.whl", hash = "sha256:b31afc90e0493fd2199284e4e2ad4774edc95d80a623d28114cc82db48741461"},
-    {file = "datasette-0.64.8.tar.gz", hash = "sha256:ee54d87152b2e3e6d4552f157e3431918f5fa929c17afd0548b0d04becbd4c97"},
+    {file = "datasette-0.65-py3-none-any.whl", hash = "sha256:34fc447f11533715ddc13ef9070ea6c4b1d705b138a94c504c29178a0bbac333"},
+    {file = "datasette-0.65.tar.gz", hash = "sha256:a7eed13809a3a28b5e0fc11c8e7f981a2e66e4818c4e0187f5f724fdc4454c4e"},
 ]
 
 [package.dependencies]
@@ -539,21 +528,24 @@ asgi-csrf = ">=0.9"
 asgiref = ">=3.2.10"
 click = ">=7.1.1"
 click-default-group = ">=1.2.3"
+flexcache = ">=0.3"
+flexparser = ">=0.3"
 httpx = ">=0.20"
 hupper = ">=1.9"
 itsdangerous = ">=1.1"
 janus = ">=0.6.2"
 Jinja2 = ">=2.10.3"
 mergedeep = ">=1.1.1"
-pint = ">=0.9"
 pip = "*"
+platformdirs = ">=2.1.0"
 pluggy = ">=1.0"
 PyYAML = ">=5.3"
 setuptools = "*"
+typing-extensions = ">=4.0.0"
 uvicorn = ">=0.11"
 
 [package.extras]
-docs = ["blacken-docs", "codespell", "furo (==2022.9.29)", "sphinx-autobuild", "sphinx-copybutton"]
+docs = ["blacken-docs", "codespell", "furo (==2024.8.6)", "sphinx-autobuild", "sphinx-copybutton"]
 rich = ["rich"]
 test = ["beautifulsoup4 (>=4.8.1)", "black (==24.4.2)", "blacken-docs (==1.12.1)", "cogapp (>=3.3.0)", "pytest (>=5.2.2)", "pytest-asyncio (>=0.17)", "pytest-timeout (>=1.4.2)", "pytest-xdist (>=2.2.1)", "trustme (>=0.7)"]
 
@@ -1191,35 +1183,6 @@ files = [
 ]
 
 [[package]]
-name = "pint"
-version = "0.24.3"
-description = "Physical quantities module"
-optional = false
-python-versions = ">=3.9"
-files = [
-    {file = "Pint-0.24.3-py3-none-any.whl", hash = "sha256:d98667e46fd03a1b94694fbfa104ec30858684d8ab26952e2a348b48059089bb"},
-    {file = "pint-0.24.3.tar.gz", hash = "sha256:d54771093e8b94c4e0a35ac638c2444ddf3ef685652bab7675ffecfa0c5c5cdf"},
-]
-
-[package.dependencies]
-appdirs = ">=1.4.4"
-flexcache = ">=0.3"
-flexparser = ">=0.3"
-typing-extensions = "*"
-
-[package.extras]
-babel = ["babel (<=2.8)"]
-bench = ["pytest", "pytest-codspeed"]
-dask = ["dask"]
-mip = ["mip (>=1.13)"]
-numpy = ["numpy (>=1.23)"]
-pandas = ["pint-pandas (>=0.3)"]
-test = ["pytest", "pytest-benchmark", "pytest-cov", "pytest-mpl", "pytest-subtests"]
-testbase = ["pytest", "pytest-benchmark", "pytest-cov", "pytest-subtests"]
-uncertainties = ["uncertainties (>=3.1.6)"]
-xarray = ["xarray"]
-
-[[package]]
 name = "pip"
 version = "24.2"
 description = "The PyPA recommended tool for installing Python packages."
@@ -1757,4 +1720,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "88ff4825960600105986b7410885b9a34e4813333f08cfd74259cea5184b4484"
+content-hash = "d06e311e15c8b5ba972898c4e5a713a4d2fa46f3089538210256cd5182e5a110"
