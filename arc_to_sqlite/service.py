@@ -359,7 +359,7 @@ def save_places(
         transform_place(place, use_spatialite=use_spatialite)
         place_id = place.pop("place_id")
 
-        place["update_at"] = datetime.datetime.utcnow()
+        place["updated_at"] = datetime.datetime.utcnow()
 
         update_or_insert(
             table=places_table,
